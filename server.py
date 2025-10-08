@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 
 DB = "events.db"
-
+#test comment
 def init_db():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
