@@ -17,7 +17,7 @@ proc = subprocess.Popen(
     bufsize=1
 )
 
-# Patterns seen in your logs
+# Patterns seen in logs
 cmd_re = re.compile(r"\] .*CMD:\s*(.+)$")
 found_re = re.compile(r"Command found:\s*(.+)$")
 ip_re = re.compile(r"(\d+\.\d+\.\d+\.\d+)")
@@ -61,7 +61,6 @@ def parse_line(line):
             "metadata": line
         }
 
-    # Optionally catch login attempts (if you want)
     if "unauthorized login" in line or "login attempt" in line.lower():
         return {
             "timestamp": datetime.utcnow().isoformat() + "Z",
