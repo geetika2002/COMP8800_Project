@@ -1,13 +1,25 @@
-# server.py
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 import sqlite3
 import uuid
 from datetime import datetime
 
 DB = "events.db"
-#test comment
+
+# Initialize FastAPI app first
+app = FastAPI(on_startup=[])
+
+# Allow cross-origin requests (so React can connect)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # for development; restrict later
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize the database
 def init_db():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -25,8 +37,11 @@ def init_db():
     conn.commit()
     conn.close()
 
-app = FastAPI(on_startup=[init_db])
+@app.on_event("startup")
+def startup_event():
+    init_db()
 
+# Event model
 class Event(BaseModel):
     timestamp: Optional[str] = None
     session_id: Optional[str] = None
@@ -35,8 +50,9 @@ class Event(BaseModel):
     dest_service: Optional[str] = None
     username: Optional[str] = None
     command: Optional[str] = None
-    metadata: Optional[str] = None  # change from dict -> str
+    metadata: Optional[str] = None
 
+# POST: Add new events (from forwarder)
 @app.post("/api/events", status_code=201)
 def ingest(event: Event):
     ev = event.dict()
@@ -52,11 +68,13 @@ def ingest(event: Event):
     conn.close()
     return {"status": "ok", "id": ev_id}
 
+# GET: Retrieve events (for dashboard)
 @app.get("/api/events")
 def list_events(limit: int = 100):
     conn = sqlite3.connect(DB)
     c = conn.cursor()
-    c.execute("SELECT id,timestamp,session_id,src_ip,src_port,dest_service,username,command,metadata FROM events ORDER BY timestamp DESC LIMIT ?", (limit,))
+    c.execute("""SELECT id,timestamp,session_id,src_ip,src_port,dest_service,
+                 username,command,metadata FROM events ORDER BY timestamp DESC LIMIT ?""", (limit,))
     rows = c.fetchall()
     conn.close()
     keys = ["id","timestamp","session_id","src_ip","src_port","dest_service","username","command","metadata"]

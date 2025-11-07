@@ -76,7 +76,7 @@ sqlite> select * from events;
 ```
 You should see logged attacker activity (timestamp, command, source IP, etc.).
 
-### 5. Testing the setup
+### 5. Testing the backend setup
 ```bash
 ssh -p 2222 root@localhost
 ```
@@ -84,8 +84,19 @@ ssh -p 2222 root@localhost
 * Observe the POST /api/events requests in the server terminal.
 * Check events.db to confirm the event is stored.
 
+### 6. Start the frontend 
+The frontend is a React framework and all source code is located in the "dashboard" folder. Ensure that you have react and Node.js version 20 or above installed. I also have installed recharts which is an npm dependancy. 
+
+Run the following commands to get the dashboard up and running. 
+```bash
+cd dashboard
+npm install 
+npm run dev 
+```
+This will output a link to a localhost:[port]. Access the link via your browser to see the dashboard. It will be linked to the backend, and all analytics will show up accordingly. 
+
 ## Future Work 
-1. Integrate dashboard for real-time visualization.
+1. Update dashboard with further features, however main functionality is present. 
 2. Add LLM module to respond to attackers through the honeypot.
 3. Enhance log parsing and event metadata collection.
 4. Deploy multi-container setup with Docker Compose.
