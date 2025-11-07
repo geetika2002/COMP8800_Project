@@ -13,8 +13,8 @@ Current prototype workflow:
 [FastAPI Server / Collector]
 -->
 [SQLite Database]
-
-Future extensions include a **dashboard** for visualizing attack activity and an **LLM module** to respond to attackers in a controlled environment.
+-->
+[React Dashboard]
 
 ---
 
