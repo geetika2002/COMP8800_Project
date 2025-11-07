@@ -1,7 +1,7 @@
 # Honeypot Data Collector 
 
 ## Project Overview 
-This project is a honeypot data collection system designed to capture and analyze SSH attacker activity. It uses **Cowrie** as the honeypot, a **FastAPI server** to receive and store events, a **forwarder script** to parse and send logs, and a **SQLite database** to persist the collected data.  
+This project is a honeypot data collection system designed to capture and analyze SSH attacker activity. It uses **Cowrie** as the honeypot, a **FastAPI server** to receive and store events, a **forwarder script** to parse and send logs, and a **SQLite database** to persist the collected data.  The backend data is visualized through an analytica React Dashboard. 
 
 Current prototype workflow: 
 (Attacker)
@@ -24,7 +24,8 @@ Current prototype workflow:
 - **FastAPI**: REST API server  
 - **SQLite**: Event storage  
 - **Requests**: HTTP client for forwarding logs  
-- **Docker**: Containerized deployment  
+- **Docker**: Containerized deployment
+- **React**: Frontend for dashboard element
 
 ---
 
