@@ -1,7 +1,7 @@
 # Honeypot Data Collector 
 
 ## Project Overview 
-This project is a honeypot data collection system designed to capture and analyze SSH attacker activity. It uses **Cowrie** as the honeypot, a **FastAPI server** to receive and store events, a **forwarder script** to parse and send logs, and a **SQLite database** to persist the collected data.  The backend data is visualized through an analytica React Dashboard. 
+This project is a honeypot data collection system designed to capture and analyze SSH attacker activity. It uses **Cowrie** as the honeypot, a **FastAPI server** to receive and store events, a **forwarder script** to parse and send logs, and a **SQLite database** to persist the collected data. The backend data is visualized through an analytical React Dashboard. 
 
 Current prototype workflow: 
 (Attacker)
@@ -86,7 +86,7 @@ ssh -p 2222 root@localhost
 * Check events.db to confirm the event is stored.
 
 ### 6. Start the frontend 
-The frontend is a React framework and all source code is located in the "dashboard" folder. Ensure that you have react and Node.js version 20 or above installed. I also have installed recharts which is an npm dependancy. 
+The frontend is a React framework and all source code is located in the "dashboard" folder; look at app.jsx specifically for the code structure. Ensure that you have react and Node.js version 20 or above installed. I also have installed recharts which is an npm dependancy. 
 
 Run the following commands to get the dashboard up and running. 
 ```bash
