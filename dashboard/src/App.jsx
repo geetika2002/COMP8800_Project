@@ -6,29 +6,33 @@ import {
 import "./App.css"; // add custom styles here
 
 export default function App() {
+  // State to hold all fetched event data
   const [events, setEvents] = useState([]);
 
+  // Fetch data from API when component mounts and every 5 seconds after
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const res = await fetch("http://127.0.0.1:8000/api/events");
         const data = await res.json();
-        setEvents(data);
+        setEvents(data); // update state with new event data
       } catch (err) {
         console.error("Error fetching events:", err);
       }
     };
 
-    fetchEvents();
-    const interval = setInterval(fetchEvents, 5000);
-    return () => clearInterval(interval);
+    fetchEvents(); // initial fetch
+    const interval = setInterval(fetchEvents, 5000); // periodic refresh
+    return () => clearInterval(interval); // cleanup interval on unmount
   }, []);
 
-  const totalAttacks = events.length;
-  const uniqueIPs = new Set(events.map((e) => e.src_ip)).size;
+  // --- Derived Metrics ---
+  const totalAttacks = events.length; // total number of attacks received
+  const uniqueIPs = new Set(events.map((e) => e.src_ip)).size; // count unique source IPs
   const latestAttack =
-    events.length > 0 ? new Date(events[0].timestamp).toLocaleString() : "N/A";
+    events.length > 0 ? new Date(events[0].timestamp).toLocaleString() : "N/A"; // get latest attack timestamp
 
+  // Group attacks by day for the LineChart
   const attacksByDay = Object.values(
     events.reduce((acc, e) => {
       const day = e.timestamp ? e.timestamp.split("T")[0] : "Unknown";
@@ -38,6 +42,7 @@ export default function App() {
     }, {})
   );
 
+  // Count frequency of each command (Top 10) for the BarChart
   const commandFrequency = Object.values(
     events.reduce((acc, e) => {
       const cmd = e.command || "Unknown";
@@ -47,6 +52,7 @@ export default function App() {
     }, {})
   ).slice(0, 10);
 
+  // Count number of attacks per source IP for the PieChart
   const ipCounts = Object.values(
     events.reduce((acc, e) => {
       const ip = e.src_ip || "Unknown";
@@ -56,12 +62,14 @@ export default function App() {
     }, {})
   );
 
+  // Define color palette for pie chart segments
   const COLORS = ["#60a5fa", "#34d399", "#fbbf24", "#f87171", "#a78bfa"];
 
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Honeypot Event Dashboard</h1>
 
+      {/* --- Summary Stats --- */}
       <div className="stats-grid">
         <div className="stat-card">
           <p className="label">Total Attacks</p>
@@ -77,7 +85,9 @@ export default function App() {
         </div>
       </div>
 
+      {/* --- Charts Section --- */}
       <div className="charts-grid">
+        {/* Line chart showing attack count over time */}
         <div className="chart-card">
           <h2>Attacks Over Time</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -91,6 +101,7 @@ export default function App() {
           </ResponsiveContainer>
         </div>
 
+        {/* Bar chart showing most common commands executed */}
         <div className="chart-card">
           <h2>Top Commands</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -105,6 +116,7 @@ export default function App() {
           </ResponsiveContainer>
         </div>
 
+        {/* Pie chart showing distribution of attacks by source IP */}
         <div className="chart-card">
           <h2>Attacks by Source IP</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -121,6 +133,7 @@ export default function App() {
         </div>
       </div>
 
+      {/* --- Recent Events Table --- */}
       <div className="table-container">
         <h2>Recent Events</h2>
         <table className="event-table">
