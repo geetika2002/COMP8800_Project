@@ -27,12 +27,12 @@ export default function App() {
   }, []);
 
   // --- Derived Metrics ---
-  const totalAttacks = events.length; // total number of attacks received
-  const uniqueIPs = new Set(events.map((e) => e.src_ip)).size; // count unique source IPs
+  const totalAttacks = events.length; 
+  const uniqueIPs = new Set(events.map((e) => e.src_ip)).size;
   const latestAttack =
-    events.length > 0 ? new Date(events[0].timestamp).toLocaleString() : "N/A"; // get latest attack timestamp
+    events.length > 0 ? new Date(events[0].timestamp).toLocaleString() : "N/A";
 
-  // Group attacks by day for the LineChart
+  // Group attacks by day
   const attacksByDay = Object.values(
     events.reduce((acc, e) => {
       const day = e.timestamp ? e.timestamp.split("T")[0] : "Unknown";
@@ -42,7 +42,7 @@ export default function App() {
     }, {})
   );
 
-  // Count frequency of each command (Top 10) for the BarChart
+  // Top commands
   const commandFrequency = Object.values(
     events.reduce((acc, e) => {
       const cmd = e.command || "Unknown";
@@ -52,7 +52,7 @@ export default function App() {
     }, {})
   ).slice(0, 10);
 
-  // Count number of attacks per source IP for the PieChart
+  // IP distribution
   const ipCounts = Object.values(
     events.reduce((acc, e) => {
       const ip = e.src_ip || "Unknown";
@@ -62,14 +62,13 @@ export default function App() {
     }, {})
   );
 
-  // Define color palette for pie chart segments
   const COLORS = ["#60a5fa", "#34d399", "#fbbf24", "#f87171", "#a78bfa"];
 
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Honeypot Event Dashboard</h1>
 
-      {/* --- Summary Stats --- */}
+      {/* Summary Stats */}
       <div className="stats-grid">
         <div className="stat-card">
           <p className="label">Total Attacks</p>
@@ -85,9 +84,8 @@ export default function App() {
         </div>
       </div>
 
-      {/* --- Charts Section --- */}
+      {/* Charts */}
       <div className="charts-grid">
-        {/* Line chart showing attack count over time */}
         <div className="chart-card">
           <h2>Attacks Over Time</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -101,7 +99,6 @@ export default function App() {
           </ResponsiveContainer>
         </div>
 
-        {/* Bar chart showing most common commands executed */}
         <div className="chart-card">
           <h2>Top Commands</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -116,7 +113,6 @@ export default function App() {
           </ResponsiveContainer>
         </div>
 
-        {/* Pie chart showing distribution of attacks by source IP */}
         <div className="chart-card">
           <h2>Attacks by Source IP</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -135,24 +131,30 @@ export default function App() {
 
       {/* --- Recent Events Table --- */}
       <div className="table-container">
-        <h2>Recent Events</h2>
+        <h2>Recent Events (Latest 50)</h2>
         <table className="event-table">
           <thead>
             <tr>
               <th>Timestamp</th>
               <th>Source IP</th>
               <th>Command</th>
+              <th>LLM Analysis</th>
             </tr>
           </thead>
+
+
+          {/* ⬇⬇⬇ ONLY CHANGE IS HERE — limit table to 50 rows */}
           <tbody>
-            {events.map((e) => (
+            {events.slice(0, 50).map((e) => (
               <tr key={e.id}>
                 <td>{e.timestamp}</td>
                 <td>{e.src_ip}</td>
                 <td>{e.command}</td>
+                <td>{e.llm_analysis || "—"}</td>
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
     </div>

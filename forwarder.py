@@ -43,7 +43,7 @@ def parse_line(line):
             "dest_service": "ssh",
             "username": None,
             "command": command,
-            "metadata": line
+            "meta_data": line
         }
 
     # Match "Command found: <command>" (some versions/log lines)
@@ -58,7 +58,7 @@ def parse_line(line):
             "dest_service": "ssh",
             "username": None,
             "command": command,
-            "metadata": line
+            "meta_data": line
         }
 
     if "unauthorized login" in line or "login attempt" in line.lower():
@@ -70,7 +70,7 @@ def parse_line(line):
             "dest_service": "ssh",
             "username": None,
             "command": "login_attempt",
-            "metadata": line
+            "meta_data": line
         }
 
     return None

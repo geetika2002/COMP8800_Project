@@ -1,4 +1,4 @@
-# models.py
+# model.py
 from sqlalchemy import Column, String, Integer, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -16,4 +16,5 @@ class Event(Base):
     dest_service = Column(String, nullable=True)
     username = Column(String, nullable=True)
     command = Column(String, nullable=True)
-    metadata = Column(Text, nullable=True)
+    meta_data = Column(Text, nullable=True)   # 👈 renamed
+    llm_analysis = Column(Text, nullable=True)
