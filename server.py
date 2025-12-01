@@ -11,11 +11,11 @@ from openai import OpenAI
 from database import SessionLocal, init_db
 from model import Event as DBEvent
 
-# ---- OpenAI client ----
+# OpenAI client setup
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# ---- FastAPI setup ----
+#FastAPI app setup
 app = FastAPI(on_startup=[init_db])
 
 app.add_middleware(
@@ -25,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---- Input model for POST ----
+# Input model for event ingestion
 class EventIn(BaseModel):
     timestamp: Optional[str] = None
     session_id: Optional[str] = None
@@ -36,7 +36,7 @@ class EventIn(BaseModel):
     command: Optional[str] = None
     meta_data: Optional[str] = None   
 
-# ---- POST: Add new events ----
+# POST: Ingest new event
 @app.post("/api/events", status_code=201)
 def ingest(event: EventIn):
     db = SessionLocal()
@@ -50,11 +50,9 @@ def ingest(event: EventIn):
     dest_service=event.dest_service,
     username=event.username,
     command=event.command,
-    meta_data=event.meta_data,   # 👈 updated
+    meta_data=event.meta_data,   
 )
-
-
-        # 🔍 Optional: generate LLM analysis
+        # Generate LLM analysis if command is present
         if event.command:
             try:
                 resp = client.chat.completions.create(
@@ -76,7 +74,7 @@ def ingest(event: EventIn):
     finally:
         db.close()
 
-# ---- GET: Retrieve events ----
+# GET : List events
 @app.get("/api/events")
 def list_events(limit: int = 999999):
     db = SessionLocal()
@@ -105,7 +103,7 @@ def list_events(limit: int = 999999):
     finally:
         db.close()
 
-# ---- POST: Generate an AI response for Cowrie ----
+# POST: Get LLM response to command
 @app.post("/api/respond")
 def respond(payload: dict):
     cmd = payload.get("command", "")

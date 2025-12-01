@@ -143,7 +143,7 @@ export default function App() {
           </thead>
 
 
-          {/* ⬇⬇⬇ ONLY CHANGE IS HERE — limit table to 50 rows */}
+          {/*limit table to 50 rows */}
           <tbody>
             {events.slice(0, 50).map((e) => (
               <tr key={e.id}>
