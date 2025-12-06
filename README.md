@@ -93,6 +93,7 @@ The FastAPI handles:
 * /api/respond → AI-generated fake shell output
 
 ### 2. Start Cowrie honeypot in Docker 
+Run the below mentioned command after ensuring that you have cowrie's repository cloned and setup in a docker container. 
 ```bash
 docker run -d --name cowrie --network=host -v ~/cowrie_override/shell/honeypot.py:/cowrie/cowrie-git/src/cowrie/shell/honeypot.py cowrie/cowrie:latest
 ```
