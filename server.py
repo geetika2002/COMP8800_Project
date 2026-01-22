@@ -6,14 +6,43 @@ from datetime import datetime
 import uuid
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
+import requests
+import json
 
 from database import SessionLocal, init_db
 from model import Event as DBEvent
 
-# OpenAI client setup
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
+
+# Use two models: fast one for interactive shell, stronger one for analysis
+OLLAMA_MODEL_SHELL = os.getenv("OLLAMA_MODEL_SHELL", "phi3:mini")
+OLLAMA_MODEL_ANALYSIS = os.getenv("OLLAMA_MODEL_ANALYSIS", "llama3.1:8b")
+
+SOC_SYSTEM = (
+    "You are a SOC analyst for a defensive SSH honeypot. "
+    "You MUST output ONLY a single JSON object and nothing else "
+    "(no markdown, no code fences, no explanation). "
+    "If unsure, use intent=\"other\" and risk_score=5."
+)
+
+def ollama_chat(model: str, system: str, user: str, *, num_predict: int, temperature: float, timeout_s: int) -> str:
+    r = requests.post(
+        f"{OLLAMA_URL}/api/chat",
+        json={
+            "model": model,
+            "stream": False,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "options": {"temperature": temperature, "num_predict": num_predict},
+        },
+        timeout=timeout_s,
+    )
+    r.raise_for_status()
+    return (r.json().get("message") or {}).get("content", "").strip()
+
 
 #FastAPI app setup
 app = FastAPI(on_startup=[init_db])
@@ -55,16 +84,32 @@ def ingest(event: EventIn):
         # Generate LLM analysis if command is present
         if event.command:
             try:
-                resp = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": "You are a cybersecurity analyst. Summarize attacker intent."},
-                        {"role": "user", "content": f"Analyze this command:\n{event.command}"}
-                    ]
+                user_prompt = (
+                    f"Observed commands: {event.command}\n"
+                    "Return ONLY JSON with keys: "
+                    "summary (string, under 25 words), "
+                    "intent (one of: recon, bruteforce, download, persistence, priv_esc, other), "
+                    "risk_score (integer 0-10), "
+                    "explanation (string, 2-4 sentences explaining the reasoning)."
+
                 )
-                ev.llm_analysis = resp.choices[0].message.content
+
+                analysis_text = ollama_chat(
+                    model=OLLAMA_MODEL_ANALYSIS,
+                    system=SOC_SYSTEM,
+                    user=user_prompt,
+                    num_predict=160,
+                    temperature=0.1,
+                    timeout_s=60,
+                )
+
+                # Store the JSON string directly (keeps your DB schema unchanged)
+                ev.llm_analysis = analysis_text
+
             except Exception as e:
-                print("LLM error:", e)
+                print("Local LLM analysis error:", e)
+                ev.llm_analysis = None
+
 
         db.add(ev)
         db.commit()
@@ -103,27 +148,41 @@ def list_events(limit: int = 999999):
     finally:
         db.close()
 
-# POST: Get LLM response to command
 @app.post("/api/respond")
 def respond(payload: dict):
     cmd = payload.get("command", "")
     if not cmd:
         raise HTTPException(status_code=400, detail="Missing command")
 
-    # Clean incoming command
     cmd = cmd.replace("\x1b", "")[:1000]
 
+    shell_system = (
+    "You are emulating a Linux shell inside an SSH honeypot. "
+    "Return ONLY the exact stdout/stderr of the command. "
+    "Do not ask questions. Do not add commentary. "
+    "Do not mention being an AI. "
+    "Do not add extra sentences. "
+    "If the command has no output, return an empty line."
+)
+
     try:
-        resp = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a fake Linux shell. Respond with realistic but safe output. Never execute commands, never reveal real system info."},
-                {"role": "user", "content": cmd}
-            ],
+        output = ollama_chat(
+            model=OLLAMA_MODEL_SHELL,
+            system=shell_system,
+            user=cmd,
+            num_predict=60,       # keep short for speed
+            temperature=0.2,
+            timeout_s=25,
         )
-        output = resp.choices[0].message.content.strip()
+
+        if not output:
+            output = "\n"
+        elif not output.endswith("\n"):
+            output += "\n"
+
+
     except Exception as e:
-        print("LLM error:", e)
+        print("Ollama error:", e)
         output = "(AI unavailable)"
 
     return {"response": output}
