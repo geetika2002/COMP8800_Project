@@ -10,7 +10,7 @@ COLLECTOR = "http://127.0.0.1:8000/api/events"
 DOCKER_CONTAINER = "cowrie"
 
 proc = subprocess.Popen(
-    ["docker", "logs", "-f", DOCKER_CONTAINER],
+    ["docker", "logs", "-f", "--tail", "0", DOCKER_CONTAINER],
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT,
     text=True,

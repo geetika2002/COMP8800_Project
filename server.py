@@ -8,6 +8,7 @@ import os
 from dotenv import load_dotenv
 import requests
 import json
+import re
 
 from database import SessionLocal, init_db
 from model import Event as DBEvent
@@ -21,17 +22,20 @@ OLLAMA_MODEL_ANALYSIS = os.getenv("OLLAMA_MODEL_ANALYSIS", "llama3.1:8b")
 
 SOC_SYSTEM = (
     "You are a SOC analyst for a defensive SSH honeypot. "
-    "You MUST output ONLY a single JSON object and nothing else "
-    "(no markdown, no code fences, no explanation). "
-    "If unsure, use intent=\"other\" and risk_score=5."
+    "Output your answer ONLY between <JSON> and </JSON> tags. "
+    "Inside the tags, output a single valid JSON object with the following keys exactly: "
+    "summary (string, under 25 words), "
+    "intent (one of: recon, bruteforce, download, persistence, priv_esc, other), "
+    "risk_score (integer from 0 to 10), "
+    "explanation (2 to 4 sentences explaining the reasoning). "
+    "No markdown, no code fences, no extra text outside the tags. "
+    "If unsure, set intent=\"other\" and risk_score=5."
 )
 
 ANALYSIS_USER_INSTRUCTIONS = (
-    "Return ONLY JSON with keys: "
-    "summary (string, under 25 words), "
-    "intent (one of: recon, bruteforce, download, persistence, priv_esc, other), "
-    "risk_score (integer 0-10), "
-    "explanation (string, 2-4 sentences explaining the reasoning)."
+    "Return your answer between <JSON> and </JSON> tags. "
+    "Inside the tags, output ONLY a JSON object with keys: "
+    "summary, intent, risk_score, explanation."
 )
 
 def ollama_chat(model: str, system: str, user: str, *, num_predict: int, temperature: float, timeout_s: int) -> str:
@@ -53,10 +57,24 @@ def ollama_chat(model: str, system: str, user: str, *, num_predict: int, tempera
 
 def safe_json_or_wrap(text: str) -> str:
     """
-    Ensure we store valid JSON (string). If model returns non-JSON, wrap it.
+    Prefer extracting JSON from <JSON>...</JSON>.
+    If that fails, try raw JSON.
+    Otherwise wrap into a fallback JSON object.
     """
     if not text:
         return ""
+
+    # 1) Extract JSON between tags
+    m = re.search(r"<JSON>\s*(\{.*?\})\s*</JSON>", text, flags=re.DOTALL)
+    if m:
+        candidate = m.group(1).strip()
+        try:
+            json.loads(candidate)
+            return candidate
+        except Exception:
+            pass
+
+    # 2) Try parsing the whole response as JSON
     try:
         json.loads(text)
         return text
@@ -249,7 +267,7 @@ def list_events(limit: int = 999999):
 
 # Manual: Analyze a whole session on-demand
 @app.post("/api/analyze/session/{session_id}", response_model=AnalyzeResult)
-def analyze_session(session_id: str, timeout_s: int = 180):  # <-- was 60
+def analyze_session(session_id: str, timeout_s: int = 180):
     db = SessionLocal()
     try:
         events = (
@@ -289,7 +307,7 @@ def analyze_session(session_id: str, timeout_s: int = 180):  # <-- was 60
 
 # Manual: Analyze recent events missing analysis (batch)
 @app.post("/api/analyze/recent", response_model=AnalyzeResult)
-def analyze_recent(limit: int = 50, timeout_s: int = 180):  # <-- was 60
+def analyze_recent(limit: int = 50, timeout_s: int = 180):
     db = SessionLocal()
     try:
         events = (
