@@ -21,3 +21,10 @@ build/
 
 # OS junk
 .DS_Store
+
+# Local secrets & editor
+.env
+.vscode/
+
+# Fine-tune / artifacts
+ft/
