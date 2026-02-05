@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+myenv/
+venv/
+.env/
+.venv/
+
+# Databases / runtime artifacts
+*.db
+*.sqlite
+*.sqlite3
+
+# Node (React dashboard)
+node_modules/
+dist/
+build/
+
+# OS junk
+.DS_Store
