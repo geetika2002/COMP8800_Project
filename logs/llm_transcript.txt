@@ -1,0 +1,464 @@
+============================================================
+TIMESTAMP : 2026-02-05T18:35:02.109034Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ls -al
+
+RESPONSE:
+total 4
+drwxr-x---  3 root staff    102 Dec 15 10:00 .
+drwxr-x---  2 root staff     60 May  7 10:00 ..
+-rw-r--r
+
+============================================================
+TIMESTAMP : 2026-02-05T18:35:06.046329Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+whoami
+
+RESPONSE:
+root
+
+============================================================
+TIMESTAMP : 2026-02-05T18:35:11.618125Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+pwd
+
+RESPONSE:
+```bash
+
+/home/honeypot_user
+
+```
+
+============================================================
+TIMESTAMP : 2026-02-05T18:35:22.404885Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ifconfig
+
+RESPONSE:
+```
+
+eth0: flags=4169h up mtu 1500 broadcast 172.16.31.10 netmask 0xffffff80 gso keepalive routes \
+	\
+	active: extras
+
+============================================================
+TIMESTAMP : 2026-02-05T18:36:23.052240Z
+MODEL     : llama3.1:8b
+ROUTE     : analysis_session_bg
+SESSION   : 0b039c5286da
+STATUS    : ok
+
+ANALYSIS OUTPUT:
+<JSON>
+{
+  "summary": "Multiple login attempts followed by reconnaissance commands",
+  "intent": "recon",
+  "risk_score": 8,
+  "explanation": "The attacker attempted to log in multiple times before executing a series of system information gathering commands (ls -al, whoami, pwd, ifconfig). This behavior is indicative of reconnaissance activity, suggesting the attacker is attempting to gather information about the system and its configuration."
+}
+</JSON>
+
+============================================================
+TIMESTAMP : 2026-02-05T22:33:50.683890Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+whoami
+
+RESPONSE:
+root
+
+============================================================
+TIMESTAMP : 2026-02-05T22:34:13.212195Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ls
+
+RESPONSE:
+```
+file1.txt
+file2.jpg
+directory/
+```
+
+============================================================
+TIMESTAMP : 2026-02-05T22:34:17.280467Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+pwd
+
+RESPONSE:
+```bash
+
+/home/honeypot_user
+
+```
+
+============================================================
+TIMESTAMP : 2026-02-05T22:34:28.088935Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ps aux
+
+RESPONSE:
+Shawn
+
+uwsgi
+
+20:17:45 sammy
+
+3698
+
++R
+
+/usr/share/nginx/html/mysite/public
+
+suspend
+
+root@yourserver.com(in
+
+============================================================
+TIMESTAMP : 2026-02-05T22:34:39.778755Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ifconfig
+
+RESPONSE:
+```
+
+eth0: flags=4169h up mtu 1500 broadcast 172.16.31.10 netmask 0xffffff80 gso pop3d isid-route ip6 unspec link scope local
+
+============================================================
+TIMESTAMP : 2026-02-05T22:38:03.699823Z
+MODEL     : llama3.1:8b
+ROUTE     : analysis_session_bg
+SESSION   : 356da2c85364
+STATUS    : ok
+
+ANALYSIS OUTPUT:
+<JSON>
+{
+  "summary": "Multiple login attempts followed by system information gathering",
+  "intent": "recon",
+  "risk_score": 8,
+  "explanation": "The attacker attempted to log in multiple times before gathering system information using 'whoami', 'ls', 'pwd', 'ps aux', and 'ifconfig' commands. This behavior is indicative of reconnaissance, where the attacker is trying to gather information about the system without attempting to exploit any vulnerabilities."
+}
+</JSON>
+
+============================================================
+TIMESTAMP : 2026-02-06T00:32:57.569086Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+whoami
+
+RESPONSE:
+root
+
+============================================================
+TIMESTAMP : 2026-02-06T00:34:05.449340Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+pwd
+
+RESPONSE:
+```
+
+/home/honeypot_user
+
+```
+
+============================================================
+TIMESTAMP : 2026-02-06T00:34:30.999992Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ifconfig
+
+RESPONSE:
+```
+
+eth0: flags=4169h<BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 metric 1000
+    inet 172.16.31.
+
+============================================================
+TIMESTAMP : 2026-02-06T00:34:36.372790Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ls
+
+RESPONSE:
+```
+file1.txt
+file2.jpg
+folder_backup
+README.md
+secret_document.pdf
+```
+
+============================================================
+TIMESTAMP : 2026-02-06T00:36:01.013025Z
+MODEL     : llama3.1:8b
+ROUTE     : analysis_session_bg
+SESSION   : b159efba3b36
+STATUS    : ok
+
+ANALYSIS OUTPUT:
+<JSON>
+{
+  "summary": "Multiple login attempts followed by reconnaissance commands",
+  "intent": "recon",
+  "risk_score": 8,
+  "explanation": "The attacker attempted to log in multiple times before executing a series of reconnaissance commands (whoami, pwd, ifconfig, ls) to gather information about the system. This behavior is indicative of an attacker attempting to understand the environment and potential vulnerabilities."
+}
+</JSON>
+
+============================================================
+TIMESTAMP : 
+MODEL     : phi3:mini
+ROUTE     : None
+SESSION   : a3e80eea-ae70-49b4-a7e1-086b06ab2e21
+STATUS    : error
+
+ANALYSIS OUTPUT:
+
+
+============================================================
+TIMESTAMP : 2026-02-06T00:40:44.610778Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ls -al
+
+RESPONSE:
+total 4
+drwxr-x---  3 root staff    102 Dec 15 10:00 .
+drwx------  2 root staff     60 May  7 10:00 ..
+-rw-r--r--   1
+
+============================================================
+TIMESTAMP : 2026-02-06T00:48:56.611265Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ls
+
+RESPONSE:
+```
+file1.txt
+file2.jpg
+directory/
+```
+
+============================================================
+TIMESTAMP : 2026-02-06T00:49:17.219674Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+whoami
+
+RESPONSE:
+root
+
+============================================================
+TIMESTAMP : 2026-02-06T00:49:31.871317Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ifconfig
+
+RESPONSE:
+```
+
+eth0: flags=4169h up mtu 1500 broadcast 172.16.31.10 netmask 0xffffff80 gso pop3d isid-route ip6 unspec link scope global
+
+============================================================
+TIMESTAMP : 2026-02-06T00:50:50.493844Z
+MODEL     : llama3.1:8b
+ROUTE     : analysis_session_bg
+SESSION   : 0062430b31f4
+STATUS    : ok
+
+ANALYSIS OUTPUT:
+<JSON>
+{
+  "summary": "Multiple login attempts followed by reconnaissance commands",
+  "intent": "recon",
+  "risk_score": 8,
+  "explanation": "The attacker attempted to log in multiple times before executing a series of reconnaissance commands (ls, whoami, ifconfig), indicating an attempt to gather information about the system. This behavior is consistent with reconnaissance activity."
+}
+</JSON>
+
+============================================================
+TIMESTAMP : 2026-02-06T01:03:12.877875Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ls
+
+RESPONSE:
+```
+file1.txt
+file2.jpg
+directory_name/
+```
+
+============================================================
+TIMESTAMP : 2026-02-06T01:03:37.680645Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+whoami
+
+RESPONSE:
+root
+
+============================================================
+TIMESTAMP : 2026-02-06T01:03:50.786235Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ifconfig
+
+RESPONSE:
+```
+
+eth0: flags=4169h<UP,BROADCAST> mtu 1500...
+
+inet 172.16.31.10 netmask 0xffffff00 broadcast 172
+
+============================================================
+TIMESTAMP : 2026-02-06T01:05:11.568833Z
+MODEL     : llama3.1:8b
+ROUTE     : analysis_session_bg
+SESSION   : 71ee529763b2
+STATUS    : ok
+
+ANALYSIS OUTPUT:
+<JSON>
+{
+  "summary": "Multiple login attempts followed by reconnaissance commands",
+  "intent": "recon",
+  "risk_score": 8,
+  "explanation": "The attacker attempted to log in multiple times before executing a series of reconnaissance commands (ls, whoami, ifconfig), indicating an attempt to gather information about the system. This behavior is consistent with reconnaissance activity."
+}
+</JSON>
+
+============================================================
+TIMESTAMP : 2026-02-06T01:14:00.564505Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ls
+
+RESPONSE:
+```
+file1.txt
+file2.jpg
+directory_a/
+directory_b/
+document.pdf
+music.mp3
+video.mkv
+```
+
+============================================================
+TIMESTAMP : 2026-02-06T01:14:15.929725Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+whoami
+
+RESPONSE:
+root
+
+============================================================
+TIMESTAMP : 2026-02-06T01:14:27.270839Z
+MODEL     : phi3:mini
+ROUTE     : shell
+STATUS    : ok
+
+COMMAND:
+ifconfig
+
+RESPONSE:
+```
+
+eth0: flags=4169h<BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 metric 1 prio=3 ip 172.16.58.3 scope
+
+============================================================
+TIMESTAMP : 2026-02-06T01:15:40.804972Z
+MODEL     : llama3.1:8b
+ROUTE     : analysis_session_bg
+SESSION   : 0245eb829b31
+STATUS    : ok
+
+ANALYSIS OUTPUT:
+<JSON>
+{
+  "summary": "Multiple login attempts followed by reconnaissance commands",
+  "intent": "recon",
+  "risk_score": 8,
+  "explanation": "The attacker attempted to log in multiple times before executing a series of reconnaissance commands (ls, whoami, ifconfig), indicating an attempt to gather information about the system. This behavior is consistent with reconnaissance activity."
+}
+</JSON>
+
+============================================================

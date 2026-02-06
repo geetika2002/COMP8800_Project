@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import "./App.css";
 
+// Helper: format timestamps safely for display (handles null/invalid values)
 function safeDateStr(ts) {
   if (!ts) return "—";
   try {
@@ -25,6 +26,7 @@ function safeDateStr(ts) {
   }
 }
 
+// Helper: normalize llm_analysis into an object (supports JSON string or raw text)
 function parseAnalysis(llmAnalysis) {
   if (!llmAnalysis) return null;
 
@@ -37,7 +39,7 @@ function parseAnalysis(llmAnalysis) {
   }
 }
 
-// Row color coding for session triage (main table only)
+// Session triage coloring for the main sessions table (green/yellow/red)
 function sessionRowStyle(session) {
   const intent = session.intent;
   const risk = session.risk;
@@ -67,6 +69,7 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
 
+  // Poll backend for latest events (live dashboard refresh)
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -91,7 +94,7 @@ export default function App() {
       ? new Date(events[0].timestamp).toLocaleString()
       : "N/A";
 
-  // Attacks by day
+  // Events by day (for timeline chart)
   const attacksByDay = Object.values(
     events.reduce((acc, e) => {
       const day = e.timestamp ? e.timestamp.split("T")[0] : "Unknown";
@@ -101,7 +104,7 @@ export default function App() {
     }, {})
   );
 
-  // Top commands (sorted)
+  // Top commands across all events (for bar chart)
   const commandFrequency = Object.values(
     events.reduce((acc, e) => {
       const cmd = e.command || "Unknown";
@@ -113,7 +116,7 @@ export default function App() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 
-  // IP distribution
+  // Event distribution by IP (for pie chart)
   const ipCounts = Object.values(
     events.reduce((acc, e) => {
       const ip = e.src_ip || "Unknown";
@@ -126,6 +129,7 @@ export default function App() {
   const COLORS = ["#60a5fa", "#34d399", "#fbbf24", "#f87171", "#a78bfa"];
 
   // --- Sessions grouping ---
+  // Groups raw events into sessions and attaches parsed LLM analysis to each session summary row.
   const sessions = useMemo(() => {
     const map = new Map();
 
@@ -145,11 +149,11 @@ export default function App() {
       const end = evs[evs.length - 1]?.timestamp || null;
       const src_ip = evs.find((x) => x.src_ip)?.src_ip || "Unknown";
 
-      // use most recent event that has llm_analysis
+      // Use the most recent event in the session that contains llm_analysis
       const analysisEvent = [...evs].reverse().find((x) => x.llm_analysis);
       const analysisObj = parseAnalysis(analysisEvent?.llm_analysis || null);
 
-      // normalized fields (if JSON)
+      // Normalized fields for table display
       const summary =
         analysisObj?.summary ||
         (analysisObj?.raw ? "Non-JSON analysis" : null) ||
@@ -177,13 +181,14 @@ export default function App() {
     return out;
   }, [events]);
 
+  // Selected session drives a simple "details page" view
   const selectedSession = useMemo(() => {
     if (!selectedSessionId) return null;
     return sessions.find((s) => s.session_id === selectedSessionId) || null;
   }, [selectedSessionId, sessions]);
 
   // ---------------------------
-  // "Details page" view
+  // Session details view
   // ---------------------------
   if (selectedSession) {
     const { analysisObj } = selectedSession;
@@ -305,13 +310,12 @@ export default function App() {
   }
 
   // ---------------------------
-  // Sessions list view
+  // Main dashboard view (sessions list + charts)
   // ---------------------------
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Honeypot Event Dashboard</h1>
 
-      {/* Summary Stats */}
       <div className="stats-grid">
         <div className="stat-card">
           <p className="label">Total Events</p>
@@ -327,7 +331,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Charts */}
       <div className="charts-grid">
         <div className="chart-card">
           <h2>Events Over Time</h2>
@@ -372,11 +375,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* Sessions table */}
       <div className="table-container">
         <h2>Sessions (Latest 50)</h2>
 
-        {/* Legend */}
         <div style={{ display: "flex", gap: 16, marginBottom: 8, fontSize: 14 }}>
           <span style={{ color: "#22c55e" }}>● Low risk</span>
           <span style={{ color: "#eab308" }}>● Recon / Suspicious</span>
