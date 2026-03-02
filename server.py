@@ -15,6 +15,9 @@ from pathlib import Path
 from database import SessionLocal, init_db
 from model import Event as DBEvent
 
+import ipaddress
+from typing import Dict, Any
+
 # -----------------------------
 # Environment / Ollama settings
 # -----------------------------
@@ -397,6 +400,79 @@ class AnalyzeResult(BaseModel):
     analyzed: int
     updated_event_ids: List[str]
 
+# -----------------------------
+# GeoIP lookup (simple + cached)
+# -----------------------------
+
+GEO_CACHE: Dict[str, Dict[str, Any]] = {}
+GEO_TTL_S = 24 * 60 * 60  # 24 hours
+
+def _is_public_ip(ip: str) -> bool:
+    try:
+        addr = ipaddress.ip_address(ip)
+        return not (addr.is_private or addr.is_loopback or addr.is_multicast or addr.is_reserved or addr.is_link_local)
+    except Exception:
+        return False
+
+def geo_lookup_ip(ip: str) -> Dict[str, Any]:
+    """
+    Simple IP geolocation lookup with in-memory caching.
+    Uses ip-api.com (no key) for quick milestone demo.
+    """
+    ip = (ip or "").strip()
+    if not ip:
+        raise HTTPException(status_code=400, detail="Missing ip")
+
+    if not _is_public_ip(ip):
+        # Honeypot is often hit by public IPs, but if you test locally you might see private ranges.
+        return {
+            "ip": ip,
+            "ok": False,
+            "reason": "Non-public or invalid IP (private/loopback/reserved).",
+        }
+
+    now = time.time()
+    cached = GEO_CACHE.get(ip)
+    if cached and (now - cached.get("_ts", 0)) < GEO_TTL_S:
+        out = dict(cached)
+        out.pop("_ts", None)
+        return out
+
+    # ip-api fields (keeps response small)
+    url = f"http://ip-api.com/json/{ip}"
+    params = {
+        "fields": "status,message,country,regionName,city,lat,lon,isp,org,as,query"
+    }
+
+    try:
+        r = requests.get(url, params=params, timeout=8)
+        r.raise_for_status()
+        data = r.json()
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Geo lookup failed: {e}")
+
+    if data.get("status") != "success":
+        return {
+            "ip": ip,
+            "ok": False,
+            "reason": data.get("message") or "lookup failed",
+        }
+
+    out = {
+        "ip": data.get("query", ip),
+        "ok": True,
+        "country": data.get("country"),
+        "region": data.get("regionName"),
+        "city": data.get("city"),
+        "lat": data.get("lat"),
+        "lon": data.get("lon"),
+        "isp": data.get("isp"),
+        "org": data.get("org"),
+        "asn": data.get("as"),
+    }
+
+    GEO_CACHE[ip] = {**out, "_ts": now}
+    return out
 
 # -----------------------------
 # API: Ingest events
@@ -485,6 +561,10 @@ def list_events(limit: int = 999999):
     finally:
         db.close()
 
+
+@app.get("/api/geo")
+def geo(ip: str):
+    return geo_lookup_ip(ip)
 
 # -----------------------------
 # API: Manual session analysis

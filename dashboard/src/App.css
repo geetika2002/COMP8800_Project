@@ -170,3 +170,19 @@
   color: #ccc;
 }
 
+/* Filters */
+select {
+  background-color: #2a2a2a;
+  color: #eaeaea;
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 8px 32px 8px 12px; /* room for arrow */
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+/* Try to style dropdown options (may be ignored by Chrome) */
+select option {
+  background-color: #2a2a2a;
+  color: #eaeaea;
+}
