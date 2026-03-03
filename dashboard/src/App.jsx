@@ -500,7 +500,53 @@ return (
           </div>
         </div>
 
-                <div className="chart-card" style={{ marginTop: 16, textAlign: "left" }}>
+                                <div className="chart-card" style={{ marginTop: 16 }}>
+          <h2>Session Analysis</h2>
+          <div style={{ display: "grid", gap: 10 }}>
+            {analysisObj ? (
+              <>
+                {"raw" in analysisObj ? (
+                  <pre
+                    style={{
+                      whiteSpace: "pre-wrap",
+                      margin: 0,
+                      padding: "12px",
+                      borderRadius: 12,
+                      background: "rgba(0,0,0,0.25)",
+                      overflow: "auto",
+                    }}
+                  >
+                    {analysisObj.raw}
+                  </pre>
+                ) : (
+                  <div style={{ display: "grid", gap: 8 }}>
+                    <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                      <span>
+                        <b>Intent:</b> {analysisObj.intent ?? "—"}
+                      </span>
+                      <span>
+                        <b>Risk:</b>{" "}
+                        {typeof analysisObj.risk_score === "number"
+                          ? analysisObj.risk_score
+                          : "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <b>Summary:</b> {analysisObj.summary ?? "—"}
+                    </div>
+                    <div>
+                      <b>Explanation:</b> {analysisObj.explanation ?? "—"}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p style={{ margin: 0 }}>No analysis yet (run exit or analyze manually).</p>
+            )}
+          </div>
+        </div>
+
+<div className="chart-card" style={{ marginTop: 16, textAlign: "left" }}>
           <h2>Activity Timeline</h2>
           <p style={{ marginTop: 0, opacity: 0.8 }}>
             Commands/events in order (timeline UI with phases + idle gaps).
@@ -634,52 +680,10 @@ return (
           )}
         </div>
 
-<div className="chart-card" style={{ marginTop: 16 }}>
-          <h2>Session Analysis</h2>
-          <div style={{ display: "grid", gap: 10 }}>
-            {analysisObj ? (
-              <>
-                {"raw" in analysisObj ? (
-                  <pre
-                    style={{
-                      whiteSpace: "pre-wrap",
-                      margin: 0,
-                      padding: "12px",
-                      borderRadius: 12,
-                      background: "rgba(0,0,0,0.25)",
-                      overflow: "auto",
-                    }}
-                  >
-                    {analysisObj.raw}
-                  </pre>
-                ) : (
-                  <div style={{ display: "grid", gap: 8 }}>
-                    <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                      <span>
-                        <b>Intent:</b> {analysisObj.intent ?? "—"}
-                      </span>
-                      <span>
-                        <b>Risk:</b>{" "}
-                        {typeof analysisObj.risk_score === "number"
-                          ? analysisObj.risk_score
-                          : "—"}
-                      </span>
-                    </div>
-                    <div>
-                      <b>Summary:</b> {analysisObj.summary ?? "—"}
-                    </div>
-                    <div>
-                      <b>Explanation:</b> {analysisObj.explanation ?? "—"}
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <p style={{ margin: 0 }}>No analysis yet (run exit or analyze manually).</p>
-            )}
-          </div>
 
-          {geoOpen && (
+        
+
+                {geoOpen && (
   <div
     onClick={() => setGeoOpen(false)}
     style={{
@@ -763,9 +767,8 @@ return (
     </div>
   </div>
 )}
-        </div>
 
-        <div className="table-container" style={{ marginTop: 16 }}>
+<div className="table-container" style={{ marginTop: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h2 style={{ margin: 0 }}>Commands / Events</h2>
             <button
