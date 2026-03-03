@@ -100,6 +100,34 @@ function riskBucket(risk) {
   return "low";
 }
 
+function classifyCommand(cmdRaw) {
+  const cmd = (cmdRaw || "").trim().toLowerCase();
+  if (!cmd) return { cat: "OTHER", level: "low" };
+
+  const recon = /^(id|whoami|pwd|uname|hostname|w|last|cat\s+\/etc\/(passwd|shadow)|ifconfig|ip\s+a|netstat|ss\s)/i;
+  const download = /(wget|curl|scp|ftp|tftp)/i;
+  const priv = /(sudo|su\b|passwd|useradd|usermod|chown|chmod\s+\+x)/i;
+  const persistence = /(crontab|systemctl|service|rc\.local|authorized_keys)/i;
+  const destructive = /(rm\s+-rf|mkfs|dd\s+if=|:>\s)/i;
+  const exit = /^(exit|logout|quit)$/i;
+
+  if (exit.test(cmd)) return { cat: "EXIT", level: "low" };
+  if (destructive.test(cmd)) return { cat: "DESTRUCT", level: "high" };
+  if (priv.test(cmd)) return { cat: "PRIV_ESC", level: "high" };
+  if (persistence.test(cmd)) return { cat: "PERSIST", level: "high" };
+  if (download.test(cmd)) return { cat: "DOWNLOAD", level: "med" };
+  if (recon.test(cmd)) return { cat: "RECON", level: "low" };
+
+  return { cat: "OTHER", level: "low" };
+}
+
+function phaseForCategory(cat) {
+  if (cat === "RECON") return "RECON PHASE";
+  if (["PRIV_ESC", "PERSIST", "DOWNLOAD", "DESTRUCT"].includes(cat)) return "ACTION PHASE";
+  if (cat === "EXIT") return "EXIT";
+  return "GENERAL";
+}
+
 function topCommandsForSession(events, limit = 3) {
   const freq = new Map();
   for (const e of events) {
@@ -116,11 +144,15 @@ function topCommandsForSession(events, limit = 3) {
 export default function App() {
   const [events, setEvents] = useState([]);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
+  const [showRawEvents, setShowRawEvents] = useState(false);
+  const [view, setView] = useState("dashboard");
 
   // Filters (Milestone 4 UX)
   const [intentFilter, setIntentFilter] = useState("all");
   const [riskFilter, setRiskFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
+  const [eventSearch, setEventSearch] = useState("");
+  const [ipSearch, setIpSearch] = useState("");
 
   const [geoOpen, setGeoOpen] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
@@ -264,6 +296,35 @@ export default function App() {
     return out;
   }, [events]);
 
+  const totalSessions = sessions.length;
+
+  const ipRows = useMemo(() => {
+    const map = new Map();
+    for (const e of events) {
+      const ip = e.src_ip || "Unknown";
+      if (!map.has(ip)) {
+        map.set(ip, {
+          ip,
+          events: 0,
+          sessions: new Set(),
+          firstSeen: e.timestamp || null,
+          lastSeen: e.timestamp || null,
+        });
+      }
+      const row = map.get(ip);
+      row.events += 1;
+      if (e.session_id) row.sessions.add(e.session_id);
+      if (e.timestamp) {
+        if (!row.firstSeen || new Date(e.timestamp) < new Date(row.firstSeen)) row.firstSeen = e.timestamp;
+        if (!row.lastSeen || new Date(e.timestamp) > new Date(row.lastSeen)) row.lastSeen = e.timestamp;
+      }
+    }
+    return Array.from(map.values())
+      .map((r) => ({ ...r, sessionCount: r.sessions.size }))
+      .sort((a, b) => b.events - a.events);
+  }, [events]);
+
+
   // Build intent dropdown options from seen intents (+ defaults)
   const intentOptions = useMemo(() => {
     const base = ["recon", "bruteforce", "download", "priv_esc", "persistence", "other"];
@@ -325,20 +386,63 @@ export default function App() {
   if (selectedSession) {
     const { analysisObj } = selectedSession;
 
-    // Build a simple “event timeline” dataset for the drilldown
-    const timelineData = selectedSession.events
-      .filter((e) => e.timestamp)
+// Enhanced Activity Timeline (Option B + intelligence)
+    const GAP_SECONDS = 10;
+
+    const rawActivity = (selectedSession.events || [])
+      .filter((e) => e && e.timestamp)
       .map((e, idx) => {
         const ms = safeTimeMs(e.timestamp);
-        return {
-          idx: idx + 1,
-          time: Number.isFinite(ms) ? new Date(ms).toLocaleTimeString() : "—",
-          ts: e.timestamp,
-          cmd: e.command || "—",
-        };
-      });
+        const timeStr = Number.isFinite(ms) ? new Date(ms).toLocaleTimeString() : "—";
+        const cmd = e.command || e.message || "—";
+        const { cat, level } = classifyCommand(cmd);
 
-    return (
+        return {
+          kind: "event",
+          idx,
+          ms,
+          time: timeStr,
+          cmd,
+          cat,
+          level,
+          phase: phaseForCategory(cat),
+        };
+      })
+      .sort((a, b) => (a.ms ?? 0) - (b.ms ?? 0));
+
+    // Add phase headers + idle gaps to make the timeline meaningfully different from the table
+    const activity = [];
+    let lastMs = null;
+    let lastPhase = null;
+
+    for (let i = 0; i < rawActivity.length; i++) {
+      const ev = rawActivity[i];
+
+      if (ev.phase !== lastPhase) {
+        activity.push({
+          kind: "phase",
+          key: `phase-${i}-${ev.phase}`,
+          label: ev.phase,
+        });
+        lastPhase = ev.phase;
+      }
+
+      if (Number.isFinite(lastMs) && Number.isFinite(ev.ms)) {
+        const gapSec = Math.round((ev.ms - lastMs) / 1000);
+        if (gapSec >= GAP_SECONDS) {
+          activity.push({
+            kind: "gap",
+            key: `gap-${i}-${gapSec}`,
+            seconds: gapSec,
+          });
+        }
+      }
+
+      activity.push({ ...ev, key: `ev-${ev.idx}-${ev.ms ?? i}` });
+      lastMs = ev.ms;
+    }
+
+return (
       <div className="dashboard-container">
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button
@@ -396,55 +500,141 @@ export default function App() {
           </div>
         </div>
 
-        <div className="chart-card" style={{ marginTop: 16 }}>
-          <h2>Session Timeline</h2>
+                <div className="chart-card" style={{ marginTop: 16, textAlign: "left" }}>
+          <h2>Activity Timeline</h2>
           <p style={{ marginTop: 0, opacity: 0.8 }}>
-            Quick view of command activity during this session.
+            Commands/events in order (timeline UI with phases + idle gaps).
           </p>
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={timelineData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" hide={timelineData.length > 20} />
-              <YAxis dataKey="idx" allowDecimals={false} />
-              <Tooltip
-                formatter={(value, name, props) => {
-                  // Show cmd in tooltip
-                  return value;
-                }}
-                labelFormatter={(label, payload) => {
-                  const p = payload?.[0]?.payload;
-                  if (!p) return label;
-                  return `${p.time} • #${p.idx}`;
-                }}
-                content={({ active, payload, label }) => {
-                  if (!active || !payload?.length) return null;
-                  const p = payload[0].payload;
+
+          {activity.length === 0 ? (
+            <div style={{ opacity: 0.8 }}>No events found for this session.</div>
+          ) : (
+            <div>
+              {activity.map((a, i) => {
+                if (a.kind === "phase") {
                   return (
                     <div
+                      key={a.key}
                       style={{
-                        background: "rgba(0,0,0,0.85)",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        padding: 10,
-                        borderRadius: 10,
-                        maxWidth: 520,
+                        margin: "10px 0 6px",
+                        padding: "6px 10px",
+                        borderRadius: 999,
+                        display: "inline-block",
+                        fontSize: 12,
+                        letterSpacing: 0.6,
+                        opacity: 0.9,
+                        border: "1px solid rgba(255,255,255,0.18)",
+                        background: "rgba(255,255,255,0.05)",
                       }}
                     >
-                      <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                        {p.time} • Event #{p.idx}
-                      </div>
-                      <div style={{ opacity: 0.9, whiteSpace: "pre-wrap" }}>
-                        {p.cmd}
-                      </div>
+                      {a.label}
                     </div>
                   );
-                }}
-              />
-              <Line type="monotone" dataKey="idx" stroke="#82ca9d" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
+                }
+
+                if (a.kind === "gap") {
+                  return (
+                    <div
+                      key={a.key}
+                      style={{
+                        marginLeft: 28,
+                        marginBottom: 6,
+                        opacity: 0.75,
+                        fontSize: 12,
+                      }}
+                    >
+                      — {a.seconds}s idle —
+                    </div>
+                  );
+                }
+
+                const badgeBg =
+                  a.level === "high"
+                    ? "rgba(255,99,132,0.18)"
+                    : a.level === "med"
+                    ? "rgba(255,217,102,0.18)"
+                    : "rgba(130,202,157,0.18)";
+
+                const dotColor =
+                  a.level === "high" ? "#ff6384" : a.level === "med" ? "#ffd966" : "#82ca9d";
+
+                // Draw a connector line if there's another event later in the list
+                const hasNextEvent = activity.slice(i + 1).some((x) => x.kind === "event");
+
+                return (
+                  <div
+                    key={a.key}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "18px 90px 1fr auto",
+                      gap: 10,
+                      alignItems: "start",
+                      padding: "10px 8px",
+                      borderRadius: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "relative",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: 999,
+                          marginTop: 4,
+                          background: dotColor,
+                        }}
+                      />
+                      {hasNextEvent && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 18,
+                            bottom: -10,
+                            width: 2,
+                            background: "rgba(255,255,255,0.15)",
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    <div
+                      style={{
+                        opacity: 0.85,
+                        whiteSpace: "nowrap",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      {a.time}
+                    </div>
+
+                    <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{a.cmd}</div>
+
+                    <div
+                      style={{
+                        fontSize: 12,
+                        padding: "3px 8px",
+                        borderRadius: 999,
+                        border: "1px solid rgba(255,255,255,0.18)",
+                        whiteSpace: "nowrap",
+                        background: badgeBg,
+                      }}
+                      title={a.cat}
+                    >
+                      {a.cat}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <div className="chart-card" style={{ marginTop: 16 }}>
+<div className="chart-card" style={{ marginTop: 16 }}>
           <h2>Session Analysis</h2>
           <div style={{ display: "grid", gap: 10 }}>
             {analysisObj ? (
@@ -576,8 +766,25 @@ export default function App() {
         </div>
 
         <div className="table-container" style={{ marginTop: 16 }}>
-          <h2>Commands / Events</h2>
-          <table className="event-table">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h2 style={{ margin: 0 }}>Commands / Events</h2>
+            <button
+              onClick={() => setShowRawEvents((s) => !s)}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 10,
+                border: "1px solid rgba(255,255,255,0.15)",
+                background: "rgba(255,255,255,0.06)",
+                color: "white",
+                cursor: "pointer",
+              }}
+            >
+              {showRawEvents ? "Hide Raw Events ▲" : "Show Raw Events ▼"}
+            </button>
+          </div>
+
+          {showRawEvents && (
+            <table className="event-table">
             <thead>
               <tr>
                 <th>Timestamp</th>
@@ -600,6 +807,177 @@ export default function App() {
               ))}
             </tbody>
           </table>
+          )}
+
+        </div>
+      </div>
+    );
+  }
+
+
+  // ---------------------------
+  // All Events view (click from stats)
+  // ---------------------------
+  if (!selectedSessionId && view === "events") {
+    const filtered = [...events]
+      .filter((e) => {
+        const q = (eventSearch || "").trim().toLowerCase();
+        if (!q) return true;
+        return (
+          String(e.command || "").toLowerCase().includes(q) ||
+          String(e.src_ip || "").toLowerCase().includes(q) ||
+          String(e.session_id || "").toLowerCase().includes(q) ||
+          String(e.event_type || "").toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+
+    return (
+      <div className="dashboard-container">
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            onClick={() => setView("dashboard")}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.15)",
+              background: "rgba(255,255,255,0.06)",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            ← Back
+          </button>
+          <h1 className="dashboard-title" style={{ margin: 0 }}>
+            All Events
+          </h1>
+        </div>
+
+        <p style={{ marginTop: 10, opacity: 0.8 }}>
+          Showing {filtered.length} events (search filters client-side).
+        </p>
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
+          <input
+            value={eventSearch}
+            onChange={(e) => setEventSearch(e.target.value)}
+            placeholder="Search events (cmd, ip, session, type)..."
+            style={{
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.15)",
+              background: "rgba(255,255,255,0.06)",
+              color: "white",
+              minWidth: 320,
+              outline: "none",
+            }}
+          />
+        </div>
+
+        <div className="table-container" style={{ marginTop: 16 }}>
+          <table className="event-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Session</th>
+                <th>Source IP</th>
+                <th>Type</th>
+                <th>Command</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((e) => (
+                <tr key={e.id || `${e.session_id}-${e.timestamp}-${e.command}`}>
+                  <td>{safeDateStr(e.timestamp)}</td>
+                  <td style={{ whiteSpace: "nowrap" }}>{e.session_id || "—"}</td>
+                  <td style={{ whiteSpace: "nowrap" }}>{e.src_ip || "—"}</td>
+                  <td style={{ whiteSpace: "nowrap" }}>{e.event_type || "—"}</td>
+                  <td style={{ maxWidth: 720 }}>{e.command || e.message || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------------------------
+  // IPs view (click from stats)
+  // ---------------------------
+  if (!selectedSessionId && view === "ips") {
+    const filteredIps = ipRows.filter((r) => {
+      const q = (ipSearch || "").trim().toLowerCase();
+      if (!q) return true;
+      return r.ip.toLowerCase().includes(q);
+    });
+
+    return (
+      <div className="dashboard-container">
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            onClick={() => setView("dashboard")}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.15)",
+              background: "rgba(255,255,255,0.06)",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            ← Back
+          </button>
+          <h1 className="dashboard-title" style={{ margin: 0 }}>
+            Unique IPs
+          </h1>
+        </div>
+
+        <p style={{ marginTop: 10, opacity: 0.8 }}>
+          {filteredIps.length} IPs found.
+        </p>
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
+          <input
+            value={ipSearch}
+            onChange={(e) => setIpSearch(e.target.value)}
+            placeholder="Search IP..."
+            style={{
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.15)",
+              background: "rgba(255,255,255,0.06)",
+              color: "white",
+              minWidth: 240,
+              outline: "none",
+            }}
+          />
+        </div>
+
+        <div className="table-container" style={{ marginTop: 16 }}>
+          <table className="event-table">
+            <thead>
+              <tr>
+                <th>IP</th>
+                <th># Events</th>
+                <th># Sessions</th>
+                <th>First Seen</th>
+                <th>Last Seen</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredIps.map((r) => (
+                <tr key={r.ip}>
+                  <td style={{ whiteSpace: "nowrap" }}>{r.ip}</td>
+                  <td>{r.events}</td>
+                  <td>{r.sessionCount}</td>
+                  <td style={{ whiteSpace: "nowrap" }}>{safeDateStr(r.firstSeen)}</td>
+                  <td style={{ whiteSpace: "nowrap" }}>{safeDateStr(r.lastSeen)}</td>
+                  
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     );
@@ -613,11 +991,27 @@ export default function App() {
       <h1 className="dashboard-title">Honeypot Event Dashboard</h1>
 
       <div className="stats-grid">
-        <div className="stat-card">
-          <p className="label">Total Events</p>
-          <p className="value">{totalAttacks}</p>
+        <div
+          className="stat-card"
+          role="button"
+          tabIndex={0}
+          onClick={() => setView("events")}
+          onKeyDown={(e) => e.key === "Enter" && setView("events")}
+          style={{ cursor: "pointer" }}
+          title="Click to view all events"
+        >
+          <p className="label">Total Sessions</p>
+          <p className="value">{totalSessions}</p>
         </div>
-        <div className="stat-card">
+        <div
+          className="stat-card"
+          role="button"
+          tabIndex={0}
+          onClick={() => setView("ips")}
+          onKeyDown={(e) => e.key === "Enter" && setView("ips")}
+          style={{ cursor: "pointer" }}
+          title="Click to view all unique IPs"
+        >
           <p className="label">Unique IPs</p>
           <p className="value">{uniqueIPs}</p>
         </div>
