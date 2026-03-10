@@ -716,7 +716,7 @@ def analyze_recent(limit: int = 50, timeout_s: int = 180):
             except Exception:
                 continue
 
-            # Only update the subset of session events that were in our "missing analysis" list
+            # Only update the subset of session events that were in "missing analysis" list
             batch_ids = {e.id for e in evs}
             for ev in session_events:
                 if ev.id in batch_ids:
@@ -747,21 +747,63 @@ def respond(payload: dict):
     if not cmd:
         raise HTTPException(status_code=400, detail="Missing command")
 
-    # Optional correlation (lets you link shell output to a session)
+    # Optional correlation 
     sid = (payload.get("session_id") or "").strip()
 
     # Basic sanitation: strip ANSI escape char and cap length
     cmd = cmd.replace("\x1b", "")[:1000]
 
+
+    #older prompt: 
+    # shell_system = (
+    #     "You are emulating a Linux shell inside an SSH honeypot. "
+    #     "Return ONLY the exact stdout/stderr of the command. "
+    #     "Do not ask questions. Do not add commentary. "
+    #     "Do not mention being an AI. "
+    #     "Do not add extra sentences. "
+    #     "If the command has no output, return an empty line."
+    # )
+
     # System prompt for "shell emulation"
     shell_system = (
-        "You are emulating a Linux shell inside an SSH honeypot. "
-        "Return ONLY the exact stdout/stderr of the command. "
-        "Do not ask questions. Do not add commentary. "
-        "Do not mention being an AI. "
-        "Do not add extra sentences. "
-        "If the command has no output, return an empty line."
-    )
+    "You are emulating a Linux shell inside an SSH honeypot. "
+    "Return ONLY the exact stdout/stderr of the command. "
+    "Do not explain anything. Do not mention being an AI. "
+    "Do not add commentary, markdown, or code fences. "
+    "If the command produces no output, return an empty line.\n\n"
+
+    "Environment:\n"
+    "- Current user: admin\n"
+    "- Hostname: srv-web-02\n"
+    "- Operating system: Ubuntu 22.04-like Linux\n"
+    "- Default working directory: /home/admin\n\n"
+
+    "Command consistency rules:\n"
+    "- If the user enters exactly 'ls', always return exactly:\n"
+    "backup.sh  notes.txt  downloads  projects\n"
+    "- If the user enters exactly 'pwd', always return exactly:\n"
+    "/home/admin\n"
+    "- If the user enters exactly 'whoami', always return exactly:\n"
+    "admin\n"
+    "- If the user enters exactly 'hostname', always return exactly:\n"
+    "srv-web-02\n"
+    "- If the user enters exactly 'uname -a', always return a realistic Linux uname string for srv-web-02.\n"
+    "- If the user enters exactly 'cat /etc/passwd', always return a short realistic passwd file containing root, daemon, www-data, and admin.\n"
+    "- If the user enters exactly 'cat /etc/shadow', return permission denied.\n\n"
+
+    "Filesystem background:\n"
+    "/home/admin contains: backup.sh, notes.txt, downloads, projects\n"
+    "/home/admin/downloads contains: readme.txt\n"
+    "/home/admin/projects contains: deploy.py, inventory.csv\n"
+    "/etc contains: hostname, issue, passwd, shadow, ssh\n"
+    "/etc/ssh contains: sshd_config\n"
+    "/var/log contains: auth.log, syslog, kern.log\n\n"
+
+    "General behavior rules:\n"
+    "- For the commands listed above, keep the output identical every time.\n"
+    "- For other commands, return short, realistic terminal output.\n"
+    "- Prefer realistic Linux-style errors for invalid commands or paths.\n"
+)
 
     try:
         # Query the fast model for terminal-like output
@@ -776,10 +818,10 @@ def respond(payload: dict):
             session_id=sid,
         )
 
-        # Ensure we return raw terminal output (no markdown fences)
+        # Ensure that we return raw terminal output (no markdown fences)
         output = strip_markdown_fences(output)
 
-        # Ensure a trailing newline (typical terminal behavior)
+        # Ensure a trailing newline 
         if not output:
             output = "\n"
         elif not output.endswith("\n"):

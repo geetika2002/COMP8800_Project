@@ -1,139 +1,173 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="798pt" height="274pt" viewBox="0.00 0.00 798.00 274.00">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 270.42)">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1003pt" height="794pt" viewBox="0.00 0.00 1003.00 794.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 790.34)">
 <title>HoneypotLLM</title>
-<polygon fill="white" stroke="none" points="-4,4 -4,-270.42 793.92,-270.42 793.92,4 -4,4"/>
+<polygon fill="white" stroke="none" points="-4,4 -4,-790.34 999.05,-790.34 999.05,4 -4,4"/>
 <!-- Attacker -->
 <g id="node1" class="node">
 <title>Attacker</title>
-<path fill="#eeeeee" stroke="black" d="M45.31,-156.82C45.31,-156.82 12,-156.82 12,-156.82 6,-156.82 0,-150.82 0,-144.82 0,-144.82 0,-132.82 0,-132.82 0,-126.82 6,-120.82 12,-120.82 12,-120.82 45.31,-120.82 45.31,-120.82 51.31,-120.82 57.31,-126.82 57.31,-132.82 57.31,-132.82 57.31,-144.82 57.31,-144.82 57.31,-150.82 51.31,-156.82 45.31,-156.82"/>
-<text xml:space="preserve" text-anchor="middle" x="28.65" y="-135.22" font-family="Times,serif" font-size="12.00">Attacker</text>
+<path fill="#d9d9d9" stroke="black" d="M48.02,-418.92C48.02,-418.92 12,-418.92 12,-418.92 6,-418.92 0,-412.92 0,-406.92 0,-406.92 0,-394.92 0,-394.92 0,-388.92 6,-382.92 12,-382.92 12,-382.92 48.02,-382.92 48.02,-382.92 54.02,-382.92 60.02,-388.92 60.02,-394.92 60.02,-394.92 60.02,-406.92 60.02,-406.92 60.02,-412.92 54.02,-418.92 48.02,-418.92"/>
+<text xml:space="preserve" text-anchor="middle" x="30.01" y="-397.32" font-family="Helvetica,sans-Serif" font-size="12.00">Attacker</text>
 </g>
 <!-- Cowrie -->
 <g id="node2" class="node">
 <title>Cowrie</title>
-<path fill="#eeeeee" stroke="black" d="M228.24,-156.82C228.24,-156.82 175.9,-156.82 175.9,-156.82 169.9,-156.82 163.9,-150.82 163.9,-144.82 163.9,-144.82 163.9,-132.82 163.9,-132.82 163.9,-126.82 169.9,-120.82 175.9,-120.82 175.9,-120.82 228.24,-120.82 228.24,-120.82 234.24,-120.82 240.24,-126.82 240.24,-132.82 240.24,-132.82 240.24,-144.82 240.24,-144.82 240.24,-150.82 234.24,-156.82 228.24,-156.82"/>
-<text xml:space="preserve" text-anchor="middle" x="202.07" y="-135.22" font-family="Times,serif" font-size="12.00">Cowrie SSH</text>
+<path fill="#d9d9d9" stroke="black" d="M280.84,-418.92C280.84,-418.92 223.49,-418.92 223.49,-418.92 217.49,-418.92 211.49,-412.92 211.49,-406.92 211.49,-406.92 211.49,-394.92 211.49,-394.92 211.49,-388.92 217.49,-382.92 223.49,-382.92 223.49,-382.92 280.84,-382.92 280.84,-382.92 286.84,-382.92 292.84,-388.92 292.84,-394.92 292.84,-394.92 292.84,-406.92 292.84,-406.92 292.84,-412.92 286.84,-418.92 280.84,-418.92"/>
+<text xml:space="preserve" text-anchor="middle" x="252.16" y="-397.32" font-family="Helvetica,sans-Serif" font-size="12.00">Cowrie SSH</text>
 </g>
 <!-- Attacker&#45;&gt;Cowrie -->
 <g id="edge1" class="edge">
 <title>Attacker-&gt;Cowrie</title>
-<path fill="none" stroke="#1e88e5" d="M57.58,-138.82C83.15,-138.82 121.57,-138.82 152.22,-138.82"/>
-<polygon fill="#1e88e5" stroke="#1e88e5" points="152.03,-142.32 162.03,-138.82 152.03,-135.32 152.03,-142.32"/>
-<text xml:space="preserve" text-anchor="middle" x="110.6" y="-142.12" font-family="Times,serif" font-size="11.00" fill="#1e88e5">SSH commands</text>
-</g>
-<!-- API -->
-<g id="node3" class="node">
-<title>API</title>
-<path fill="#f5f5f5" stroke="black" d="M532.53,-156.82C532.53,-156.82 456.21,-156.82 456.21,-156.82 450.21,-156.82 444.21,-150.82 444.21,-144.82 444.21,-144.82 444.21,-132.82 444.21,-132.82 444.21,-126.82 450.21,-120.82 456.21,-120.82 456.21,-120.82 532.53,-120.82 532.53,-120.82 538.53,-120.82 544.53,-126.82 544.53,-132.82 544.53,-132.82 544.53,-144.82 544.53,-144.82 544.53,-150.82 538.53,-156.82 532.53,-156.82"/>
-<text xml:space="preserve" text-anchor="middle" x="494.37" y="-135.22" font-family="Times,serif" font-size="12.00">FastAPI Backend</text>
-</g>
-<!-- Cowrie&#45;&gt;API -->
-<g id="edge2" class="edge">
-<title>Cowrie-&gt;API</title>
-<path fill="none" stroke="#1e88e5" d="M240.34,-152.62C256.73,-157.95 276.35,-163.36 294.57,-165.82 341.01,-172.09 393.54,-164.31 432.94,-155.52"/>
-<polygon fill="#1e88e5" stroke="#1e88e5" points="433.52,-158.98 442.47,-153.31 431.94,-152.16 433.52,-158.98"/>
-<text xml:space="preserve" text-anchor="middle" x="327.56" y="-171.39" font-family="Times,serif" font-size="11.00" fill="#1e88e5">/api/respond</text>
+<path fill="none" stroke="#1e88e5" d="M60.24,-400.92C95.81,-400.92 156.49,-400.92 199.89,-400.92"/>
+<polygon fill="#1e88e5" stroke="#1e88e5" points="199.85,-404.42 209.85,-400.92 199.85,-397.42 199.85,-404.42"/>
+<text xml:space="preserve" text-anchor="middle" x="135.75" y="-404.22" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#1e88e5">SSH commands</text>
 </g>
 <!-- Fwd -->
-<g id="node7" class="node">
+<g id="node3" class="node">
 <title>Fwd</title>
-<path fill="#e8f5e9" stroke="black" d="M348.55,-156.82C348.55,-156.82 306.57,-156.82 306.57,-156.82 300.57,-156.82 294.57,-150.82 294.57,-144.82 294.57,-144.82 294.57,-132.82 294.57,-132.82 294.57,-126.82 300.57,-120.82 306.57,-120.82 306.57,-120.82 348.55,-120.82 348.55,-120.82 354.55,-120.82 360.55,-126.82 360.55,-132.82 360.55,-132.82 360.55,-144.82 360.55,-144.82 360.55,-150.82 354.55,-156.82 348.55,-156.82"/>
-<text xml:space="preserve" text-anchor="middle" x="327.56" y="-135.22" font-family="Times,serif" font-size="12.00">Forwarder</text>
+<path fill="#c8d2c8" stroke="black" d="M443.69,-511.92C443.69,-511.92 397.02,-511.92 397.02,-511.92 391.02,-511.92 385.02,-505.92 385.02,-499.92 385.02,-499.92 385.02,-487.92 385.02,-487.92 385.02,-481.92 391.02,-475.92 397.02,-475.92 397.02,-475.92 443.69,-475.92 443.69,-475.92 449.69,-475.92 455.69,-481.92 455.69,-487.92 455.69,-487.92 455.69,-499.92 455.69,-499.92 455.69,-505.92 449.69,-511.92 443.69,-511.92"/>
+<text xml:space="preserve" text-anchor="middle" x="420.35" y="-490.32" font-family="Helvetica,sans-Serif" font-size="12.00">Forwarder</text>
 </g>
 <!-- Cowrie&#45;&gt;Fwd -->
 <g id="edge6" class="edge">
 <title>Cowrie-&gt;Fwd</title>
-<path fill="none" stroke="#43a047" d="M240.45,-138.82C253.88,-138.82 269.13,-138.82 283.03,-138.82"/>
-<polygon fill="#43a047" stroke="#43a047" points="282.8,-142.32 292.8,-138.82 282.8,-135.32 282.8,-142.32"/>
-<text xml:space="preserve" text-anchor="middle" x="267.4" y="-142.12" font-family="Times,serif" font-size="11.00" fill="#43a047">logs</text>
+<path fill="none" stroke="#2e7d32" d="M286,-419.29C311.86,-433.76 348.13,-454.06 376.32,-469.83"/>
+<polygon fill="#2e7d32" stroke="#2e7d32" points="374.55,-472.85 384.98,-474.68 377.97,-466.74 374.55,-472.85"/>
+<text xml:space="preserve" text-anchor="middle" x="338.93" y="-456.28" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#2e7d32">logs</text>
 </g>
-<!-- API&#45;&gt;Cowrie -->
-<g id="edge5" class="edge">
-<title>API-&gt;Cowrie</title>
-<path fill="none" stroke="#1e88e5" d="M451.44,-120.34C411.19,-104.95 348.67,-87.26 294.57,-98.62 278.02,-102.1 260.8,-108.76 245.82,-115.67"/>
-<polygon fill="#1e88e5" stroke="#1e88e5" points="244.71,-112.32 237.21,-119.8 247.74,-118.63 244.71,-112.32"/>
-<text xml:space="preserve" text-anchor="middle" x="327.56" y="-101.92" font-family="Times,serif" font-size="11.00" fill="#1e88e5">fake output</text>
-</g>
-<!-- Ollama -->
+<!-- API -->
 <g id="node4" class="node">
-<title>Ollama</title>
-<path fill="#f5f5f5" stroke="black" d="M777.92,-228.82C777.92,-228.82 679.29,-228.82 679.29,-228.82 673.29,-228.82 667.29,-222.82 667.29,-216.82 667.29,-216.82 667.29,-204.82 667.29,-204.82 667.29,-198.82 673.29,-192.82 679.29,-192.82 679.29,-192.82 777.92,-192.82 777.92,-192.82 783.92,-192.82 789.92,-198.82 789.92,-204.82 789.92,-204.82 789.92,-216.82 789.92,-216.82 789.92,-222.82 783.92,-228.82 777.92,-228.82"/>
-<text xml:space="preserve" text-anchor="middle" x="728.6" y="-207.22" font-family="Times,serif" font-size="12.00">Ollama (Local LLMs)</text>
+<title>API</title>
+<path fill="#d9d9d9" stroke="black" d="M677.61,-418.92C677.61,-418.92 592.9,-418.92 592.9,-418.92 586.9,-418.92 580.9,-412.92 580.9,-406.92 580.9,-406.92 580.9,-394.92 580.9,-394.92 580.9,-388.92 586.9,-382.92 592.9,-382.92 592.9,-382.92 677.61,-382.92 677.61,-382.92 683.61,-382.92 689.61,-388.92 689.61,-394.92 689.61,-394.92 689.61,-406.92 689.61,-406.92 689.61,-412.92 683.61,-418.92 677.61,-418.92"/>
+<text xml:space="preserve" text-anchor="middle" x="635.25" y="-397.32" font-family="Helvetica,sans-Serif" font-size="12.00">FastAPI Backend</text>
 </g>
-<!-- API&#45;&gt;Ollama -->
-<g id="edge3" class="edge">
-<title>API-&gt;Ollama</title>
-<path fill="none" stroke="#1e88e5" d="M501.06,-157.22C509.8,-181.87 529.12,-224.62 562.53,-242.82 600.51,-263.51 649.83,-249.53 684.63,-234.08"/>
-<polygon fill="#1e88e5" stroke="#1e88e5" points="685.98,-237.31 693.57,-229.91 683.02,-230.97 685.98,-237.31"/>
-<text xml:space="preserve" text-anchor="middle" x="605.91" y="-256.52" font-family="Times,serif" font-size="11.00" fill="#1e88e5">shell model</text>
-</g>
-<!-- API&#45;&gt;Ollama -->
-<g id="edge9" class="edge">
-<title>API-&gt;Ollama</title>
-<path fill="none" stroke="#43a047" d="M507.23,-157.14C519.02,-173.55 538.77,-196.55 562.53,-206.82 591.34,-219.27 625.71,-221.8 655.61,-220.62"/>
-<polygon fill="#43a047" stroke="#43a047" points="655.53,-224.13 665.32,-220.08 655.14,-217.14 655.53,-224.13"/>
-<text xml:space="preserve" text-anchor="middle" x="605.91" y="-224.18" font-family="Times,serif" font-size="11.00" fill="#43a047">analysis model (bg)</text>
-</g>
-<!-- DB -->
-<g id="node5" class="node">
-<title>DB</title>
-<path fill="#f5f5f5" stroke="black" d="M751.77,-120.82C751.77,-120.82 705.43,-120.82 705.43,-120.82 699.43,-120.82 693.43,-114.82 693.43,-108.82 693.43,-108.82 693.43,-96.82 693.43,-96.82 693.43,-90.82 699.43,-84.82 705.43,-84.82 705.43,-84.82 751.77,-84.82 751.77,-84.82 757.77,-84.82 763.77,-90.82 763.77,-96.82 763.77,-96.82 763.77,-108.82 763.77,-108.82 763.77,-114.82 757.77,-120.82 751.77,-120.82"/>
-<text xml:space="preserve" text-anchor="middle" x="728.6" y="-99.22" font-family="Times,serif" font-size="12.00">SQLite DB</text>
-</g>
-<!-- API&#45;&gt;DB -->
-<g id="edge8" class="edge">
-<title>API-&gt;DB</title>
-<path fill="none" stroke="#43a047" d="M544.71,-125.36C550.69,-123.98 556.73,-122.69 562.53,-121.62 602.49,-114.26 648.47,-109.31 681.73,-106.34"/>
-<polygon fill="#43a047" stroke="#43a047" points="681.77,-109.85 691.43,-105.5 681.16,-102.88 681.77,-109.85"/>
-<text xml:space="preserve" text-anchor="middle" x="605.91" y="-124.92" font-family="Times,serif" font-size="11.00" fill="#43a047">store events</text>
-</g>
-<!-- API&#45;&gt;DB -->
-<g id="edge11" class="edge">
-<title>API-&gt;DB</title>
-<path fill="none" stroke="#43a047" d="M515.1,-120.47C527.65,-110.09 544.82,-98.12 562.53,-92.62 601.7,-80.45 648.55,-85.04 682.32,-91.47"/>
-<polygon fill="#43a047" stroke="#43a047" points="681.26,-94.82 691.76,-93.4 682.66,-87.97 681.26,-94.82"/>
-<text xml:space="preserve" text-anchor="middle" x="605.91" y="-95.92" font-family="Times,serif" font-size="11.00" fill="#43a047">save llm_analysis</text>
-</g>
-<!-- Dash -->
-<g id="node6" class="node">
-<title>Dash</title>
-<path fill="#eeeeee" stroke="black" d="M765.75,-48.82C765.75,-48.82 691.45,-48.82 691.45,-48.82 685.45,-48.82 679.45,-42.82 679.45,-36.82 679.45,-36.82 679.45,-24.82 679.45,-24.82 679.45,-18.82 685.45,-12.82 691.45,-12.82 691.45,-12.82 765.75,-12.82 765.75,-12.82 771.75,-12.82 777.75,-18.82 777.75,-24.82 777.75,-24.82 777.75,-36.82 777.75,-36.82 777.75,-42.82 771.75,-48.82 765.75,-48.82"/>
-<text xml:space="preserve" text-anchor="middle" x="728.6" y="-27.22" font-family="Times,serif" font-size="12.00">React Dashboard</text>
-</g>
-<!-- API&#45;&gt;Dash -->
-<g id="edge13" class="edge">
-<title>API-&gt;Dash</title>
-<path fill="none" stroke="black" d="M507.79,-120.39C519.84,-103.99 539.63,-80.64 562.53,-67.62 594.61,-49.38 634.98,-40.18 667.76,-35.54"/>
-<polygon fill="black" stroke="black" points="668.05,-39.03 677.52,-34.28 667.15,-32.09 668.05,-39.03"/>
-<text xml:space="preserve" text-anchor="middle" x="605.91" y="-70.92" font-family="Times,serif" font-size="11.00">sessions + analysis</text>
-</g>
-<!-- Ollama&#45;&gt;API -->
-<g id="edge4" class="edge">
-<title>Ollama-&gt;API</title>
-<path fill="none" stroke="#1e88e5" d="M666.94,-197.5C628.17,-188.72 581.7,-177.63 562.53,-170.82 555.33,-168.26 547.88,-165.18 540.67,-161.95"/>
-<polygon fill="#1e88e5" stroke="#1e88e5" points="542.25,-158.83 531.71,-157.8 539.31,-165.18 542.25,-158.83"/>
-<text xml:space="preserve" text-anchor="middle" x="605.91" y="-195.76" font-family="Times,serif" font-size="11.00" fill="#1e88e5">stdout/stderr</text>
-</g>
-<!-- Ollama&#45;&gt;API -->
-<g id="edge10" class="edge">
-<title>Ollama-&gt;API</title>
-<path fill="none" stroke="#43a047" d="M708.76,-192.5C693.9,-179.26 671.95,-162.24 649.29,-153.62 619.82,-142.42 585.01,-138.38 555.95,-137.29"/>
-<polygon fill="#43a047" stroke="#43a047" points="556.31,-133.79 546.22,-137.04 556.13,-140.79 556.31,-133.79"/>
-<text xml:space="preserve" text-anchor="middle" x="605.91" y="-156.92" font-family="Times,serif" font-size="11.00" fill="#43a047">JSON analysis</text>
-</g>
-<!-- Dash&#45;&gt;API -->
-<g id="edge12" class="edge">
-<title>Dash-&gt;API</title>
-<path fill="none" stroke="black" d="M683.43,-12.41C648.24,-0.83 599,8.2 562.53,-13.62 527.96,-34.3 510.16,-79.55 501.81,-109.61"/>
-<polygon fill="black" stroke="black" points="498.44,-108.65 499.34,-119.21 505.22,-110.4 498.44,-108.65"/>
-<text xml:space="preserve" text-anchor="middle" x="605.91" y="-16.92" font-family="Times,serif" font-size="11.00">GET /api/events</text>
+<!-- Cowrie&#45;&gt;API -->
+<g id="edge2" class="edge">
+<title>Cowrie-&gt;API</title>
+<path fill="none" stroke="#1e88e5" d="M293.22,-400.92C358.89,-400.92 490.01,-400.92 569.15,-400.92"/>
+<polygon fill="#1e88e5" stroke="#1e88e5" points="568.93,-404.42 578.93,-400.92 568.93,-397.42 568.93,-404.42"/>
+<text xml:space="preserve" text-anchor="middle" x="420.35" y="-404.22" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#1e88e5">/api/respond</text>
 </g>
 <!-- Fwd&#45;&gt;API -->
 <g id="edge7" class="edge">
 <title>Fwd-&gt;API</title>
-<path fill="none" stroke="#43a047" d="M360.73,-138.82C381.11,-138.82 408.11,-138.82 432.44,-138.82"/>
-<polygon fill="#43a047" stroke="#43a047" points="432.24,-142.32 442.24,-138.82 432.24,-135.32 432.24,-142.32"/>
-<text xml:space="preserve" text-anchor="middle" x="402.38" y="-142.12" font-family="Times,serif" font-size="11.00" fill="#43a047">/api/events</text>
+<path fill="none" stroke="#2e7d32" d="M456.03,-478.77C490.14,-463.87 542.65,-440.93 581.84,-423.81"/>
+<polygon fill="#2e7d32" stroke="#2e7d32" points="583.12,-427.07 590.88,-419.86 580.31,-420.66 583.12,-427.07"/>
+<text xml:space="preserve" text-anchor="middle" x="518.3" y="-464.48" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#2e7d32">/api/events</text>
+</g>
+<!-- API&#45;&gt;Cowrie -->
+<g id="edge3" class="edge">
+<title>API-&gt;Cowrie</title>
+<path fill="none" stroke="#1e88e5" d="M580.4,-392.4C568.7,-390.57 556.38,-388.67 544.9,-386.92 474.41,-376.18 455.95,-366.48 385.02,-373.72 358.12,-376.46 328.6,-382.28 304.33,-387.83"/>
+<polygon fill="#1e88e5" stroke="#1e88e5" points="303.64,-384.4 294.7,-390.09 305.24,-391.22 303.64,-384.4"/>
+<text xml:space="preserve" text-anchor="middle" x="420.35" y="-377.02" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#1e88e5">fake output</text>
+</g>
+<!-- Ollama -->
+<g id="node5" class="node">
+<title>Ollama</title>
+<path fill="#d9d9d9" stroke="black" d="M977.36,-722.92C977.36,-722.92 874.66,-722.92 874.66,-722.92 868.66,-722.92 862.66,-716.92 862.66,-710.92 862.66,-710.92 862.66,-698.92 862.66,-698.92 862.66,-692.92 868.66,-686.92 874.66,-686.92 874.66,-686.92 977.36,-686.92 977.36,-686.92 983.36,-686.92 989.36,-692.92 989.36,-698.92 989.36,-698.92 989.36,-710.92 989.36,-710.92 989.36,-716.92 983.36,-722.92 977.36,-722.92"/>
+<text xml:space="preserve" text-anchor="middle" x="926.01" y="-701.32" font-family="Helvetica,sans-Serif" font-size="12.00">Ollama (Local LLMs)</text>
+</g>
+<!-- API&#45;&gt;Ollama -->
+<g id="edge4" class="edge">
+<title>API-&gt;Ollama</title>
+<path fill="none" stroke="#1e88e5" d="M637.95,-419.3C644.55,-486.08 670.84,-714.2 725.61,-756.92 774.42,-794.99 848.34,-757.84 891.13,-729.76"/>
+<polygon fill="#1e88e5" stroke="#1e88e5" points="892.96,-732.75 899.28,-724.25 889.04,-726.95 892.96,-732.75"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-776.44" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#1e88e5">shell model</text>
+</g>
+<!-- API&#45;&gt;Ollama -->
+<g id="edge8" class="edge">
+<title>API-&gt;Ollama</title>
+<path fill="none" stroke="#2e7d32" d="M635.87,-419.26C635.91,-470.03 643.61,-613.13 725.61,-680.92 760,-709.35 809.83,-715.35 851.08,-714.25"/>
+<polygon fill="#2e7d32" stroke="#2e7d32" points="851.11,-717.75 860.95,-713.82 850.81,-710.75 851.11,-717.75"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-716.9" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#2e7d32">analysis model (bg)</text>
+</g>
+<!-- DB -->
+<g id="node6" class="node">
+<title>DB</title>
+<path fill="#d9d9d9" stroke="black" d="M950.36,-456.92C950.36,-456.92 901.67,-456.92 901.67,-456.92 895.67,-456.92 889.67,-450.92 889.67,-444.92 889.67,-444.92 889.67,-432.92 889.67,-432.92 889.67,-426.92 895.67,-420.92 901.67,-420.92 901.67,-420.92 950.36,-420.92 950.36,-420.92 956.36,-420.92 962.36,-426.92 962.36,-432.92 962.36,-432.92 962.36,-444.92 962.36,-444.92 962.36,-450.92 956.36,-456.92 950.36,-456.92"/>
+<text xml:space="preserve" text-anchor="middle" x="926.01" y="-435.32" font-family="Helvetica,sans-Serif" font-size="12.00">SQLite DB</text>
+</g>
+<!-- API&#45;&gt;DB -->
+<g id="edge10" class="edge">
+<title>API-&gt;DB</title>
+<path fill="none" stroke="#2e7d32" d="M659.72,-419.24C676.9,-431.43 701.35,-446.37 725.61,-452.92 776.6,-466.67 837.44,-459.13 878.39,-450.74"/>
+<polygon fill="#2e7d32" stroke="#2e7d32" points="878.88,-454.22 887.91,-448.69 877.4,-447.38 878.88,-454.22"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-463.81" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#2e7d32">store events</text>
+</g>
+<!-- API&#45;&gt;DB -->
+<g id="edge11" class="edge">
+<title>API-&gt;DB</title>
+<path fill="none" stroke="#2e7d32" d="M689.89,-407.97C744.02,-415.1 826.78,-425.99 878.3,-432.77"/>
+<polygon fill="#2e7d32" stroke="#2e7d32" points="877.55,-436.2 887.92,-434.03 878.47,-429.26 877.55,-436.2"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-427.74" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#2e7d32">save llm_analysis</text>
+</g>
+<!-- API&#45;&gt;DB -->
+<g id="edge17" class="edge">
+<title>API-&gt;DB</title>
+<path fill="none" stroke="#fb8c00" d="M689.89,-387.65C727.14,-380.58 777.65,-375.28 820.98,-385.72 844.72,-391.43 869.14,-403.54 888.34,-414.75"/>
+<polygon fill="#fb8c00" stroke="#fb8c00" points="886.49,-417.73 896.86,-419.89 890.11,-411.73 886.49,-417.73"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-389.02" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#fb8c00">store geolocation</text>
+</g>
+<!-- React -->
+<g id="node7" class="node">
+<title>React</title>
+<path fill="#d9d9d9" stroke="black" d="M968.71,-228.92C968.71,-228.92 883.32,-228.92 883.32,-228.92 877.32,-228.92 871.32,-222.92 871.32,-216.92 871.32,-216.92 871.32,-204.92 871.32,-204.92 871.32,-198.92 877.32,-192.92 883.32,-192.92 883.32,-192.92 968.71,-192.92 968.71,-192.92 974.71,-192.92 980.71,-198.92 980.71,-204.92 980.71,-204.92 980.71,-216.92 980.71,-216.92 980.71,-222.92 974.71,-228.92 968.71,-228.92"/>
+<text xml:space="preserve" text-anchor="middle" x="926.01" y="-207.32" font-family="Helvetica,sans-Serif" font-size="12.00">React Dashboard</text>
+</g>
+<!-- API&#45;&gt;React -->
+<g id="edge13" class="edge">
+<title>API-&gt;React</title>
+<path fill="none" stroke="black" d="M664.2,-382.52C716.49,-348.12 829.11,-274.02 887.77,-235.42"/>
+<polygon fill="black" stroke="black" points="889.35,-238.57 895.78,-230.15 885.51,-232.72 889.35,-238.57"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-342.76" font-family="Helvetica,sans-Serif" font-size="11.00">sessions + analysis</text>
+</g>
+<!-- Geo -->
+<g id="node8" class="node">
+<title>Geo</title>
+<path fill="#d9d9d9" stroke="black" d="M983.05,-38.92C983.05,-38.92 868.98,-38.92 868.98,-38.92 862.98,-38.92 856.98,-32.92 856.98,-26.92 856.98,-26.92 856.98,-14.92 856.98,-14.92 856.98,-8.92 862.98,-2.92 868.98,-2.92 868.98,-2.92 983.05,-2.92 983.05,-2.92 989.05,-2.92 995.05,-8.92 995.05,-14.92 995.05,-14.92 995.05,-26.92 995.05,-26.92 995.05,-32.92 989.05,-38.92 983.05,-38.92"/>
+<text xml:space="preserve" text-anchor="middle" x="926.01" y="-17.32" font-family="Helvetica,sans-Serif" font-size="12.00">IP Geolocation Service</text>
+</g>
+<!-- API&#45;&gt;Geo -->
+<g id="edge15" class="edge">
+<title>API-&gt;Geo</title>
+<path fill="none" stroke="#fb8c00" d="M637.15,-382.64C640.49,-333.8 655.86,-198.49 725.61,-117.72 756.89,-81.49 804.85,-57.61 845.89,-42.64"/>
+<polygon fill="#fb8c00" stroke="#fb8c00" points="847.01,-45.95 855.29,-39.34 844.69,-39.35 847.01,-45.95"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-121.02" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#fb8c00">lookup IP</text>
+</g>
+<!-- Ollama&#45;&gt;API -->
+<g id="edge5" class="edge">
+<title>Ollama-&gt;API</title>
+<path fill="none" stroke="#1e88e5" d="M879.84,-686.53C828.3,-664.84 748.21,-628.72 725.61,-604.92 677.55,-554.29 652.84,-473.62 642.44,-430.45"/>
+<polygon fill="#1e88e5" stroke="#1e88e5" points="645.87,-429.76 640.22,-420.8 639.05,-431.33 645.87,-429.76"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-661.56" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#1e88e5">stdout/stderr</text>
+</g>
+<!-- Ollama&#45;&gt;API -->
+<g id="edge9" class="edge">
+<title>Ollama-&gt;API</title>
+<path fill="none" stroke="#2e7d32" d="M909.45,-686.78C889.36,-663.51 853.17,-622.06 820.98,-587.72 766.27,-529.33 699.79,-463.24 663.37,-427.42"/>
+<polygon fill="#2e7d32" stroke="#2e7d32" points="665.88,-424.98 656.29,-420.47 660.97,-429.98 665.88,-424.98"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-591.02" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#2e7d32">JSON analysis</text>
+</g>
+<!-- React&#45;&gt;API -->
+<g id="edge12" class="edge">
+<title>React-&gt;API</title>
+<path fill="none" stroke="black" d="M871.11,-194.86C828.28,-185.46 768.64,-180.21 725.61,-207.72 668.71,-244.09 647.51,-326.98 640.04,-371.45"/>
+<polygon fill="black" stroke="black" points="636.61,-370.73 638.54,-381.14 643.52,-371.79 636.61,-370.73"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-211.02" font-family="Helvetica,sans-Serif" font-size="11.00">GET /api/events</text>
+</g>
+<!-- React&#45;&gt;API -->
+<g id="edge14" class="edge">
+<title>React-&gt;API</title>
+<path fill="none" stroke="#fb8c00" d="M900.03,-192.57C859.85,-165.5 779.88,-121.94 725.61,-159.72 655.73,-208.35 640.37,-318.32 637.09,-371.29"/>
+<polygon fill="#fb8c00" stroke="#fb8c00" points="633.6,-370.91 636.59,-381.07 640.59,-371.26 633.6,-370.91"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-163.02" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#fb8c00">GET /api/geo/{ip}</text>
+</g>
+<!-- Geo&#45;&gt;API -->
+<g id="edge16" class="edge">
+<title>Geo-&gt;API</title>
+<path fill="none" stroke="#fb8c00" d="M856.85,-3.66C814.56,2.78 761.61,2.56 725.61,-26.72 671.64,-70.61 646.33,-290.83 638.78,-371.36"/>
+<polygon fill="#fb8c00" stroke="#fb8c00" points="635.31,-370.83 637.89,-381.11 642.29,-371.47 635.31,-370.83"/>
+<text xml:space="preserve" text-anchor="middle" x="773.3" y="-30.02" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#fb8c00">geo result</text>
 </g>
 </g>
 </svg>

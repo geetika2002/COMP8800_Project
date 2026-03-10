@@ -16,7 +16,8 @@ It integrates:
 
 ---
 
-## System Workflow
+# System Workflow
+
 ```text
 (Attacker)
       │
@@ -33,13 +34,17 @@ It integrates:
       ▼
 [FastAPI Collector /api/events]
       │
-      │  (LLM #2: Session / Event Analysis)
+      │  (LLM #2: Session Analysis)
       └──> Local LLM (Ollama) → analysis stored in DB
       ▼
 [SQLite Database]
       ▼
 [React Dashboard]
-(Session summaries, risk scoring, command timelines)
+      │
+      ├── Session analysis view
+      ├── Command timeline visualization
+      ├── Dashboard statistics and charts
+      └── IP geolocation lookup
 
 ```
 ---
@@ -72,41 +77,145 @@ It integrates:
 ## Key Features
 
 ### 1. Realistic SSH Interaction
-- Cowrie captures attacker commands.
-- Commands are forwarded to FastAPI.
-- A local LLM generates realistic but safe Linux shell output.
-- Attackers experience a convincing interactive shell without real system access.
+Cowrie captures attacker commands during an SSH session.
+
+Commands are forwarded to the FastAPI backend where a local LLM generates realistic Linux shell output.
+
+This allows attackers to interact with what appears to be a real Linux environment while keeping the host system fully isolated.
+
+Key behavior:
+* Commands are intercepted and sent to /api/respond
+* A local LLM generates plausible shell output
+* Output is returned to Cowrie and shown to the attacker
+
+The environment simulates a Linux server with realistic directories, users, and command responses.
 
 ### 2. Session-Based Attacker Analysis
-- Events are grouped by **Cowrie session ID**.
-- Analysis is performed **once per session** (on logout/exit or manually).
-- Each session receives:
-  - Intent classification (e.g., recon, bruteforce, persistence)
-  - Risk score (0–10)
-  - Natural-language explanation
-- The same analysis is attached to all events in that session.
+Events are grouped by Cowrie session ID.
 
+Instead of analyzing each command individually, the system performs one analysis per session to improve context and reduce LLM calls.
+
+Each session receives:
+
+* Intent classification (recon, bruteforce, download, persistence, priv_esc, other)
+* Risk score (0–10)
+* Natural language explanation of attacker behavior
+
+The analysis result is stored as structured JSON in the database and attached to all events belonging to that session.
+
+This allows the dashboard to quickly display attacker intent without re-running analysis.
 ### 3. Background & On-Demand Analysis
-- Analysis runs asynchronously to keep ingestion fast.
-- Manual endpoints allow:
-  - Re-analyzing a full session
-  - Batch-analyzing recent unanalyzed events
+Analysis is designed to run asynchronously so event ingestion remains fast.
+
+Two mechanisms are available:
+
+1. Automatic Analysis: Session analysis automatically triggers when the honeypot detects commands such as: exit, logout, quit. 
+
+2. Manual Analysis: The API also exposes endpoints to run analysis manually.
+
 
 ### 4. Visual Dashboard
-The React dashboard provides:
-- High-level statistics (event count, unique IPs, timelines)
-- Charts:
-  - Events over time
-  - Top commands
-  - Source IP distribution
-- Session-centric table with:
-  - Intent
-  - Risk score
-  - Color-coded triage (green/yellow/red)
-- Click-through session detail view:
-  - Full command timeline
-  - LLM-generated analysis
-  - Raw metadata
+The React dashboard provides an investigation interface for honeypot activity.
+
+The dashboard displays key system metrics:
+
+* Total sessions observed
+* Unique attacking IP addresses
+* Timestamp of the most recent event
+
+Interactive navigation is supported:
+
+* Clicking Total Sessions opens a full event table
+* Clicking Unique IPs opens an IP activity table
+* Charts
+
+The dashboard visualizes honeypot activity using:
+
+* Events over time
+* Most frequently executed commands
+* Source IP distribution
+
+These charts help identify trends in attacker behavior.
+
+Session Table:
+
+* Session ID
+* Detected attacker intent
+* Risk score
+* Top commands executed
+* AI-generated summary
+* Session start time
+* Session end time
+* Session duration
+* Source IP address
+* Number of events
+
+Sessions are color-coded for quick triage:
+
+* Green → low-risk or unknown activity
+* Yellow → reconnaissance behavior
+* Red → active attack behavior (privilege escalation, persistence, downloads)
+
+Clicking a session opens a detailed investigation view.
+
+### 5. Activity Timeline
+
+The session detail view includes an **activity timeline** that visualizes attacker behavior during the session.
+
+Each command is categorized using **regex-based classification rules**.
+
+Examples of command types detected:
+
+- Reconnaissance commands (`whoami`, `uname`, `hostname`)
+- File download tools (`wget`, `curl`)
+- Privilege escalation attempts (`sudo`, `su`)
+- Persistence mechanisms (`crontab`, `systemctl`)
+- Destructive commands (`rm -rf`, `dd`)
+
+Commands are grouped into phases:
+
+- **Recon Phase**
+- **Action Phase**
+- **Exit Phase**
+- **General Activity**
+
+The timeline displays:
+
+- Command execution order
+- Command classification badges
+- Phase transitions
+- Idle time gaps between commands
+
+Idle gaps help analysts infer attacker behavior, such as:
+
+- Uploading malware
+- Reviewing files
+- Running automated scripts
+
+
+### 6. IP Geolocation
+
+The dashboard supports **geolocation lookup for attacker IP addresses**.
+
+When a source IP is clicked:
+
+1. The React dashboard calls the FastAPI backend (`/api/geo`)
+2. The backend queries the `ip-api.com` geolocation service
+3. Location data is returned as JSON
+4. The dashboard renders the location using an embedded **OpenStreetMap** view
+
+Displayed information includes:
+
+- Country
+- Region
+- City
+- ISP / Organization
+- Autonomous System Number (ASN)
+- Approximate map location
+
+Geolocation results are cached for **24 hours** to reduce repeated API requests.
+
+> **Note:** Geolocation only works with **public IP addresses**. Private or localhost IPs cannot be resolved.
 
 ---
 
@@ -222,24 +331,32 @@ When `forwarder.py` posts events to the backend:
 
 ## Future Work
 
-1. **Security and Isolation**
-   - Harden Docker containers
-   - Sandbox LLM execution
-   - Add rate limiting and abuse detection
+The final stage of this project will focus on testing, evaluation, and documentation to ensure the system operates reliably and securely.
 
-2. **Improved Analysis Accuracy**
-   - Refine intent categories and risk scoring
-   - Better handling of noisy or incomplete sessions
+1. **System Testing and Validation**
+   - Perform end-to-end testing of the full pipeline (Cowrie → forwarder → FastAPI → database → dashboard).
+   - Simulate attacks using tools such as Hydra or Metasploit to verify accurate event capture and session logging.
+   - Validate that the dashboard metrics match backend database results.
 
-3. **Dashboard Enhancements**
-   - Severity-based filtering and search
-   - Expandable analysis cards
-   - Real-time event streaming
-   - Session comparison and trend views
+2. **LLM Evaluation and Consistency Improvements**
+   - Test the reliability of the local LLM used for shell responses and session analysis.
+   - Improve prompt templates and response filtering to ensure realistic but safe outputs.
+   - Evaluate response consistency across repeated commands and attacker scenarios.
 
-4. **Deployment Improvements**
-   - Docker Compose for full-stack orchestration
-   - Environment-based configuration (dev vs prod)
+3. **Bug Fixes and Stability Improvements**
+   - Resolve minor UI or backend issues discovered during testing.
+   - Improve error handling across the forwarder, backend API, and dashboard.
+   - Optimize event processing and database queries where necessary.
+
+4. **Optional Deployment Experiments**
+   - Explore container orchestration using Docker Compose.
+   - Experiment with optional cloud deployment (e.g., AWS EC2) for collecting real-world honeypot traffic.
+   - Evaluate how the system performs when exposed to external attack traffic.
+
+5. **Final Documentation and Demonstration**
+   - Prepare the final report and project documentation.
+   - Record a system demonstration showcasing the honeypot interaction, AI responses, and dashboard analytics.
+   - Summarize findings on attacker behavior observed through the honeypot.
 ---
 ## Notes
 - `forwarder.py` must run continuously while Cowrie is active.
