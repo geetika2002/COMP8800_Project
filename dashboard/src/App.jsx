@@ -212,18 +212,6 @@ export default function App() {
     }, {})
   );
 
-  // Top commands across all events (for bar chart)
-  const commandFrequency = Object.values(
-    events.reduce((acc, e) => {
-      const cmd = e.command || "Unknown";
-      acc[cmd] = acc[cmd] || { command: cmd, count: 0 };
-      acc[cmd].count += 1;
-      return acc;
-    }, {})
-  )
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10);
-
   // Event distribution by IP (for pie chart)
   const ipCounts = Object.values(
     events.reduce((acc, e) => {
@@ -295,6 +283,35 @@ export default function App() {
     out.sort((a, b) => new Date(b.end) - new Date(a.end));
     return out;
   }, [events]);
+
+    // Top command families across latest 50 sessions
+  const commandFrequency = useMemo(() => {
+    const latestSessionIds = sessions.slice(0, 50).map((s) => s.session_id);
+    const sessionSet = new Set(latestSessionIds);
+
+    const freq = {};
+
+    for (const e of events) {
+      if (!sessionSet.has(e.session_id)) continue;
+
+      const raw = (e.command || "").trim().toLowerCase();
+      if (!raw) continue;
+
+      // Remove noisy commands
+      if (["exit", "logout", "quit", "login_success", "login_attempt"].includes(raw)) continue;
+
+      // Normalize to base command
+      const base = raw.split(/\s+/)[0];
+      if (!base) continue;
+
+      freq[base] = freq[base] || { command: base, count: 0 };
+      freq[base].count += 1;
+    }
+
+    return Object.values(freq)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }, [events, sessions]);
 
   const totalSessions = sessions.length;
 
@@ -1043,7 +1060,13 @@ return (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={commandFrequency}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="command" />
+              <XAxis
+                dataKey="command"
+                interval={0}
+                angle={-25}
+                textAnchor="end"
+                height={70}
+              />
               <YAxis />
               <Tooltip />
               <Legend />

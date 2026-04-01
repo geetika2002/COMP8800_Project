@@ -94,8 +94,9 @@ def parse_line(line: str):
             "meta_data": line,
         }
 
-    # Login attempts (treated as a synthetic command)
-    if "unauthorized login" in line.lower() or "login attempt" in line.lower():
+        # Successful login only
+    lower = line.lower()
+    if "login attempt" in lower and "succeeded" in lower:
         return {
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "session_id": current_session_id_for(line),
@@ -103,7 +104,7 @@ def parse_line(line: str):
             "src_port": None,
             "dest_service": "ssh",
             "username": None,
-            "command": "login_attempt",
+            "command": "login_success",
             "meta_data": line,
         }
 
