@@ -229,6 +229,42 @@ def strip_markdown_fences(text: str) -> str:
     return t.rstrip() + "\n"
 
 
+
+
+def normalize_shell_output(cmd: str, output: str) -> str:
+    """
+    Normalize obviously non-shell, assistant-like, or malformed model output
+    into short Linux-style terminal responses.
+    """
+    clean_cmd = (cmd or "").strip()
+    out = strip_markdown_fences(output or "").strip()
+    lowered = out.lower()
+
+    invalid_markers = [
+        "please enter a valid command",
+        "invalid command",
+        "unknown command",
+        "check your permissions and try again",
+        "command result transcription",
+        "transcript ends here",
+        "as an ai",
+    ]
+
+    is_simple_command = bool(re.fullmatch(r"[A-Za-z0-9._/+:-]+", clean_cmd))
+
+    if any(marker in lowered for marker in invalid_markers):
+        if is_simple_command:
+            return f"bash: {clean_cmd}: command not found\n"
+        return "bash: syntax error near unexpected token `newline'\n"
+
+    if is_simple_command and lowered in {"permission denied", "permission denied."}:
+        return f"bash: {clean_cmd}: command not found\n"
+
+    if not out:
+        return "\n"
+
+    return out.rstrip() + "\n"
+
 # -----------------------------
 # Prompt building for sessions
 # -----------------------------
@@ -747,66 +783,59 @@ def respond(payload: dict):
     if not cmd:
         raise HTTPException(status_code=400, detail="Missing command")
 
-    # Optional correlation 
     sid = (payload.get("session_id") or "").strip()
 
     # Basic sanitation: strip ANSI escape char and cap length
-    cmd = cmd.replace("\x1b", "")[:1000]
+    cmd = cmd.replace("", "")[:1000]
+    stripped_cmd = cmd.strip()
 
+    # Hard-handle symbol-only / malformed shell syntax before the LLM sees it
+    if stripped_cmd and re.fullmatch(r"[^\w\s]+", stripped_cmd):
+        return {"response": "bash: syntax error near unexpected token `;`\n"}
 
-    #older prompt: 
-    # shell_system = (
-    #     "You are emulating a Linux shell inside an SSH honeypot. "
-    #     "Return ONLY the exact stdout/stderr of the command. "
-    #     "Do not ask questions. Do not add commentary. "
-    #     "Do not mention being an AI. "
-    #     "Do not add extra sentences. "
-    #     "If the command has no output, return an empty line."
-    # )
-
-    # System prompt for "shell emulation"
     shell_system = (
-    "You are emulating a Linux shell inside an SSH honeypot. "
-    "Return ONLY the exact stdout/stderr of the command. "
-    "Do not explain anything. Do not mention being an AI. "
-    "Do not add commentary, markdown, or code fences. "
-    "If the command produces no output, return an empty line.\n\n"
-
-    "Environment:\n"
-    "- Current user: admin\n"
-    "- Hostname: srv-web-02\n"
-    "- Operating system: Ubuntu 22.04-like Linux\n"
-    "- Default working directory: /home/admin\n\n"
-
-    "Command consistency rules:\n"
-    "- If the user enters exactly 'ls', always return exactly:\n"
-    "backup.sh  notes.txt  downloads  projects\n"
-    "- If the user enters exactly 'pwd', always return exactly:\n"
-    "/home/admin\n"
-    "- If the user enters exactly 'whoami', always return exactly:\n"
-    "admin\n"
-    "- If the user enters exactly 'hostname', always return exactly:\n"
-    "srv-web-02\n"
-    "- If the user enters exactly 'uname -a', always return a realistic Linux uname string for srv-web-02.\n"
-    "- If the user enters exactly 'cat /etc/passwd', always return a short realistic passwd file containing root, daemon, www-data, and admin.\n"
-    "- If the user enters exactly 'cat /etc/shadow', return permission denied.\n\n"
-
-    "Filesystem background:\n"
-    "/home/admin contains: backup.sh, notes.txt, downloads, projects\n"
-    "/home/admin/downloads contains: readme.txt\n"
-    "/home/admin/projects contains: deploy.py, inventory.csv\n"
-    "/etc contains: hostname, issue, passwd, shadow, ssh\n"
-    "/etc/ssh contains: sshd_config\n"
-    "/var/log contains: auth.log, syslog, kern.log\n\n"
-
-    "General behavior rules:\n"
-    "- For the commands listed above, keep the output identical every time.\n"
-    "- For other commands, return short, realistic terminal output.\n"
-    "- Prefer realistic Linux-style errors for invalid commands or paths.\n"
-)
+        "You are emulating a Linux shell inside an SSH honeypot. "
+        "Return ONLY the exact stdout/stderr of the command. "
+        "Do not explain anything. Do not mention being an AI. "
+        "Do not add commentary, markdown, code fences, transcript markers, or labels. "
+        "If the command produces no output, return an empty line.\n\n"
+        "Environment:\n"
+        "- Current user: admin\n"
+        "- Hostname: srv-web-02\n"
+        "- Operating system: Ubuntu 22.04-like Linux\n"
+        "- Default working directory: /home/admin\n\n"
+        "Command consistency rules:\n"
+        "- If the user enters exactly 'ls', always return exactly:\n"
+        "backup.sh  notes.txt  downloads  projects\n"
+        "- If the user enters exactly 'pwd', always return exactly:\n"
+        "/home/admin\n"
+        "- If the user enters exactly 'whoami', always return exactly:\n"
+        "admin\n"
+        "- If the user enters exactly 'hostname', always return exactly:\n"
+        "srv-web-02\n"
+        "- If the user enters exactly 'uname -a', always return a realistic Linux uname string for srv-web-02.\n"
+        "- If the user enters exactly 'cat /etc/passwd', always return a short realistic passwd file containing root, daemon, www-data, and admin.\n"
+        "- If the user enters exactly 'cat /etc/shadow', return permission denied.\n\n"
+        "Filesystem background:\n"
+        "/home/admin contains: backup.sh, notes.txt, downloads, projects\n"
+        "/home/admin/downloads contains: readme.txt\n"
+        "/home/admin/projects contains: deploy.py, inventory.csv\n"
+        "/etc contains: hostname, issue, passwd, shadow, ssh\n"
+        "/etc/ssh contains: sshd_config\n"
+        "/var/log contains: auth.log, syslog, kern.log\n\n"
+        "General behavior rules:\n"
+        "- For the commands listed above, keep the output identical every time.\n"
+        "- For other commands, return short, realistic terminal output.\n"
+        "- If a command is unknown, invalid, or nonsensical, return exactly in this format:\n"
+        "bash: <command>: command not found\n"
+        "- If a file exists but is not readable, return a realistic permission denied error.\n"
+        "- If a path does not exist, return a realistic no such file or directory error.\n"
+        "- Do not say 'please enter a valid command'.\n"
+        "- Do not explain errors.\n"
+        "- Never add transcript markers, labels, or extra commentary.\n"
+    )
 
     try:
-        # Query the fast model for terminal-like output
         output = ollama_chat(
             model=OLLAMA_MODEL_SHELL,
             system=shell_system,
@@ -817,18 +846,9 @@ def respond(payload: dict):
             route="shell",
             session_id=sid,
         )
-
-        # Ensure that we return raw terminal output (no markdown fences)
-        output = strip_markdown_fences(output)
-
-        # Ensure a trailing newline 
-        if not output:
-            output = "\n"
-        elif not output.endswith("\n"):
-            output += "\n"
+        output = normalize_shell_output(cmd, output)
 
     except Exception as e:
-        # Don’t crash the API if Ollama is down; return a safe fallback
         print("Ollama error:", e)
         output = "(AI unavailable)\n"
 
