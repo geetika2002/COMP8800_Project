@@ -311,6 +311,8 @@ Open the provided localhost URL to view:
 
 ## LLM Features
 
+All AI-generated responses are simulated and do not execute real system commands, ensuring the honeypot remains fully isolated and safe.
+
 ### AI-Powered Fake Shell Responses
 - Cowrie intercepts attacker commands.
 - Commands are forwarded to FastAPI via `/api/respond`.
@@ -327,36 +329,53 @@ When `forwarder.py` posts events to the backend:
   - Natural-language explanation
 - The analysis result is stored in **SQLite** and attached to relevant events.
 - The React dashboard retrieves and displays this analysis.
+
+### AI Fine-Tuning Experimentation
+
+A custom dataset was generated from real honeypot sessions and used to fine-tune a smaller language model using LoRA.
+
+Results:
+- Improved structured JSON output consistency
+- Better domain-specific alignment
+- Larger pretrained models still outperformed in reasoning and accuracy
+
+This highlights a trade-off between efficiency and performance when using local models.
+
+#### Dataset Preparation
+
+A custom dataset was created from real Cowrie honeypot sessions to support fine-tuning.
+
+The dataset pipeline included:
+
+- Raw session extraction (`raw_sessions.jsonl`)
+- Initial labeling with structured outputs (`labeled_sessions_firstpass.jsonl`)
+- Dataset balancing to reduce class bias (`train_balanced.jsonl`)
+- Train / validation / test split:
+  - Training set (`train_v2.jsonl`)
+  - Validation set (`valid_v2.jsonl`)
+  - Test set (`test_v2.jsonl`)
+
+Only the training dataset was used to update model weights, while validation and test sets were used for evaluation and generalization.
+
+Each entry follows an instruction-based format:
+- Input: attacker command sequence  
+- Output: structured JSON (summary, intent, risk score, explanation)
 ---
+## Final Evaluation (Completed)
 
-## Future Work
+- End-to-end testing of full pipeline (Cowrie → forwarder → FastAPI → database → dashboard)
+- Fixed dashboard issues (command frequency chart + duplicate login events)
+- Validated system behavior under normal and edge-case scenarios
+- Evaluated AI model performance and consistency
 
-The final stage of this project will focus on testing, evaluation, and documentation to ensure the system operates reliably and securely.
+## Potential Future Work
 
-1. **System Testing and Validation**
-   - Perform end-to-end testing of the full pipeline (Cowrie → forwarder → FastAPI → database → dashboard).
-   - Simulate attacks using tools such as Hydra or Metasploit to verify accurate event capture and session logging.
-   - Validate that the dashboard metrics match backend database results.
+If this project is ever worked on in the future, key characteristics to work on can include: 
 
-2. **LLM Evaluation and Consistency Improvements**
-   - Test the reliability of the local LLM used for shell responses and session analysis.
-   - Improve prompt templates and response filtering to ensure realistic but safe outputs.
-   - Evaluate response consistency across repeated commands and attacker scenarios.
-
-3. **Bug Fixes and Stability Improvements**
-   - Resolve minor UI or backend issues discovered during testing.
-   - Improve error handling across the forwarder, backend API, and dashboard.
-   - Optimize event processing and database queries where necessary.
-
-4. **Optional Deployment Experiments**
-   - Explore container orchestration using Docker Compose.
-   - Experiment with optional cloud deployment (e.g., AWS EC2) for collecting real-world honeypot traffic.
-   - Evaluate how the system performs when exposed to external attack traffic.
-
-5. **Final Documentation and Demonstration**
-   - Prepare the final report and project documentation.
-   - Record a system demonstration showcasing the honeypot interaction, AI responses, and dashboard analytics.
-   - Summarize findings on attacker behavior observed through the honeypot.
+- Expand dataset for improved fine-tuning
+- Improve LLM reasoning for edge cases
+- Optional Docker Compose orchestration
+- Cloud deployment for real-world attack collection
 ---
 ## Notes
 - `forwarder.py` must run continuously while Cowrie is active.

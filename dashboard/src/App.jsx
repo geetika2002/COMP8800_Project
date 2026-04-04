@@ -17,7 +17,7 @@ import {
 import "./App.css";
 
 function osmEmbedUrl(lat, lon) {
-  // Simple bbox around the point (bigger box = more zoomed out)
+  // Simple box around the point (bigger box = more zoomed out)
   const delta = 0.5;
   const left = lon - delta;
   const right = lon + delta;
