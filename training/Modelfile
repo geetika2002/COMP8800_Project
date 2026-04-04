@@ -1,0 +1,12 @@
+FROM ./ft/outputs/tinyllama-merged
+
+TEMPLATE """{{- if .System }}<|system|>
+{{ .System }}
+{{- end }}<|user|>
+{{ .Prompt }}
+<|assistant|>"""
+
+SYSTEM "You MUST output ONLY a single JSON object and nothing else.
+No markdown. No code fences. No explanations. No extra keys."
+
+PARAMETER temperature 0
